@@ -18,24 +18,18 @@
 
 extern char * FILE_PATH;
 extern int SLICE_INDEX;
+extern Eigen::MatrixXd SLICE;
 extern nifti_image * NII;
-
-// define a structure that will hold information for width and height
-typedef struct win_config
-{
-    const int windowWidth;
-    const int windowHeight;
-} win_config; 
-
+extern double rotationAngle;
+extern nifti_1_header NII_HEADER;
 
 // OpenGL texture ID
 extern GLuint textureID;
 
-win_config get_win_dimension();
-void read_nifti_file(nifti_image *&nii);
+void read_nifti_file();
+void loadAndSliceNifti();
+void initializeGL(int argc, char** argv);
 void print_nifti_header(nifti_image *nii);
-Eigen::MatrixXd loadAndSliceNifti();
-void initializeGL(int argc, char** argv, win_config this_win_config);
 
 
 #endif

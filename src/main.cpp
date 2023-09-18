@@ -2,6 +2,7 @@
 #include "quicknii_cli.h"
 
 char * FILE_PATH;
+Eigen::MatrixXd SLICE;
 
 // a function config command line options
 void config_cli_options(int argc, char** argv) {
@@ -23,11 +24,10 @@ void config_cli_options(int argc, char** argv) {
 int main(int argc, char** argv){
     // an empty pointer to store file path from command line input
     config_cli_options(argc, argv);
-    win_config this_win_config = get_win_dimension();
-
-    Eigen::MatrixXd slice = loadAndSliceNifti();
-
+    
+    read_nifti_file();
+    loadAndSliceNifti();
     // Initialize GLFW and OpenGL
-    initializeGL(argc, argv, this_win_config);
+    initializeGL(argc, argv);
     return 0;
 }

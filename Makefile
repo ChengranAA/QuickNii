@@ -9,7 +9,7 @@
 CC = g++
 
 # compiler flags
-CFLAGS = -Wall -Wextra -Wpedantic -std=c++11 -I./include -I./include/nifti -I/opt/homebrew/Cellar/eigen/3.4.0_1/include/eigen3
+CFLAGS = -Wall -Wextra -Wpedantic -std=c++11 -I./include -I./include/nifti -I/opt/homebrew/Cellar/eigen/3.4.0_1/include/eigen3 
 
 # linker flags
 LFLAGS = -L./lib/nifti_clib -lniftiio -lznz -lz -framework OpenGL -framework Cocoa -framework IOKit -framework GLUT

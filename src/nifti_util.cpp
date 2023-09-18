@@ -1,29 +1,36 @@
 #include "quicknii.h"
 int SLICE_INDEX = 0;
 
-win_config get_win_dimension()
+void readFirst348Bytes(const char *filename, nifti_1_header * ret)
 {
-    nifti_image *nii = nifti_image_read(FILE_PATH, 0);
-    // if the nifti file is not read
-    if (nii == NULL)
+    FILE *file = fopen(filename, "rb"); // Open the file in binary mode for reading
+    if (file == NULL)
     {
-        std::cout << "Error reading nifti file." << std::endl;
-        exit(1);
+        printf("Failed to open the file.\n");
+        return;
     }
 
-    win_config this_win_config = {.windowHeight = (const int)nii->ny, .windowWidth = (const int)nii->nx};
+    size_t bytesRead = fread(ret, sizeof(char), sizeof(nifti_1_header), file);
+    if (bytesRead < sizeof(nifti_1_header))
+    {
+        printf("Failed to read the first 384 bytes of the file.\n");
+        fclose(file);
+        return;
+    }
 
-    return this_win_config;
+    fclose(file);
 }
 
+
 // a function to read a nifti file into nifti_image struct
-void read_nifti_file(nifti_image *&nii)
+void read_nifti_file()
 {
     // read the nifti file
-    nii = nifti_image_read(FILE_PATH, 1);
+    NII = nifti_image_read(FILE_PATH, 1);
+    readFirst348Bytes(FILE_PATH, &NII_HEADER);
 
     // if the nifti file is not read
-    if (nii == NULL)
+    if (NII == NULL)
     {
         std::cout << "Error reading nifti file." << std::endl;
         return;
@@ -54,13 +61,10 @@ void print_nifti_header(nifti_image *nii)
     printf("\n");
 }
 
-Eigen::MatrixXd loadAndSliceNifti()
+void loadAndSliceNifti()
 {
-    nifti_image *nii = nullptr;
-    read_nifti_file(nii);
-
     // Check and handle different data types
-    switch (nii->datatype)
+    switch (NII->datatype)
     {
     case NIFTI_TYPE_FLOAT32:
         break; // Supported data type
@@ -75,14 +79,14 @@ Eigen::MatrixXd loadAndSliceNifti()
     // Add cases for other data types as needed
     default:
         std::cerr << "Unsupported datatype. Only specific data types are supported." << std::endl;
-        nifti_image_free(nii);
+        nifti_image_free(NII);
         exit(1);
     }
 
 
-    int DIMX = nii->nx;
-    int DIMY = nii->ny;
-    int DIMZ = nii->nz;
+    int DIMX = NII->nx;
+    int DIMY = NII->ny;
+    int DIMZ = NII->nz;
 
     if (SLICE_INDEX >= DIMZ) SLICE_INDEX = SLICE_INDEX - DIMZ; // wrapp around if exceed the z-dimension boundary
     if (SLICE_INDEX < 0)  SLICE_INDEX = DIMZ + SLICE_INDEX; // wrapp around if exceed the z-dimension boundary
@@ -96,22 +100,22 @@ Eigen::MatrixXd loadAndSliceNifti()
         for (int row = 0; row < DIMY; row++)
         {
             int voxelIndex = sliceIndex * DIMX * DIMY + col + DIMX * row;
-            switch (nii->datatype)
+            switch (NII->datatype)
             {
             case NIFTI_TYPE_FLOAT32:
-                sliceMatrix(col, row) = ((float *)nii->data)[voxelIndex];
+                sliceMatrix(col, row) = ((float *)NII->data)[voxelIndex];
                 break;
             case NIFTI_TYPE_INT16:
-                sliceMatrix(col, row) = ((short *)nii->data)[voxelIndex];
+                sliceMatrix(col, row) = ((short *)NII->data)[voxelIndex];
                 break;
             case NIFTI_TYPE_UINT16:
-                sliceMatrix(col, row) = ((unsigned short *)nii->data)[voxelIndex];
+                sliceMatrix(col, row) = ((unsigned short *)NII->data)[voxelIndex];
                 break;
             case NIFTI_TYPE_INT32:
-                sliceMatrix(col, row) = ((int *)nii->data)[voxelIndex];
+                sliceMatrix(col, row) = ((int *)NII->data)[voxelIndex];
                 break;
             case NIFTI_TYPE_UINT8:
-                sliceMatrix(col, row) = ((unsigned char *)nii->data)[voxelIndex];
+                sliceMatrix(col, row) = ((unsigned char *)NII->data)[voxelIndex];
                 break;
             // Add cases for other data types as needed
             default:
@@ -122,7 +126,5 @@ Eigen::MatrixXd loadAndSliceNifti()
         }
     }
 
-    nifti_image_free(nii);
-
-    return sliceMatrix;
+    SLICE = sliceMatrix;
 }
