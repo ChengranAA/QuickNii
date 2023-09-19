@@ -1,131 +1,136 @@
 #include "quicknii.h"
 int SLICE_INDEX = 0;
 
-std::string sliceOrderToString(int sliceOrder) {
+std::string sliceOrderToString(int sliceOrder)
+{
     std::string result;
 
-    switch (sliceOrder) {
-        case 0:
-            result = "Slice order unknown";
-            break;
-        case 1:
-            result = "Sequential, increasing";
-            break;
-        case 2:
-            result = "Sequential, decreasing";
-            break;
-        case 3:
-            result = "Interleaved, increasing, starting at the 1st MRI slice";
-            break;
-        case 4:
-            result = "Interleaved, decreasing, starting at the last MRI slice";
-            break;
-        case 5:
-            result = "Interleaved, increasing, starting at the 2nd MRI slice";
-            break;
-        case 6:
-            result = "Interleaved, decreasing, starting at one before the last MRI slice";
-            break;
-        default:
-            result = "Unknown slice order";
-            break;
+    switch (sliceOrder)
+    {
+    case 0:
+        result = "Slice order unknown";
+        break;
+    case 1:
+        result = "Sequential, increasing";
+        break;
+    case 2:
+        result = "Sequential, decreasing";
+        break;
+    case 3:
+        result = "Interleaved, increasing, starting at the 1st MRI slice";
+        break;
+    case 4:
+        result = "Interleaved, decreasing, starting at the last MRI slice";
+        break;
+    case 5:
+        result = "Interleaved, increasing, starting at the 2nd MRI slice";
+        break;
+    case 6:
+        result = "Interleaved, decreasing, starting at one before the last MRI slice";
+        break;
+    default:
+        result = "Unknown slice order";
+        break;
     }
 
     return result;
 }
 
-
-std::string dataTypeToString(int dataType) {
+std::string dataTypeToString(int dataType)
+{
     std::string result;
 
-    switch (dataType) {
-        case 0:
-            result = "unknown - 0";
-            break;
-        case 1:
-            result = "bool - 1 bit";
-            break;
-        case 2:
-            result = "unsigned char - 8 bits";
-            break;
-        case 4:
-            result = "signed short - 16 bits";
-            break;
-        case 8:
-            result = "signed int - 32 bits";
-            break;
-        case 16:
-            result = "float - 32 bits";
-            break;
-        case 32:
-            result = "complex - 64 bits";
-            break;
-        case 64:
-            result = "double - 64 bits";
-            break;
-        case 128:
-            result = "rgb - 24 bits";
-            break;
-        case 255:
-            result = "all - 255";
-            break;
-        case 256:
-            result = "signed char - 8 bits";
-            break;
-        case 512:
-            result = "unsigned short - 16 bits";
-            break;
-        case 768:
-            result = "unsigned int - 32 bits";
-            break;
-        case 1024:
-            result = "long long - 64 bits";
-            break;
-        case 1280:
-            result = "unsigned long long - 64 bits";
-            break;
-        case 1536:
-            result = "long double - 128 bits";
-            break;
-        case 1792:
-            result = "double pair - 128 bits";
-            break;
-        case 2048:
-            result = "long double pair - 256 bits";
-            break;
-        case 2304:
-            result = "rgba - 32 bits";
-            break;
-        default:
-            result = "Unknown data type.";
-            break;
+    switch (dataType)
+    {
+    case 0:
+        result = "unknown - 0";
+        break;
+    case 1:
+        result = "bool - 1 bit";
+        break;
+    case 2:
+        result = "unsigned char - 8 bits";
+        break;
+    case 4:
+        result = "signed short - 16 bits";
+        break;
+    case 8:
+        result = "signed int - 32 bits";
+        break;
+    case 16:
+        result = "float - 32 bits";
+        break;
+    case 32:
+        result = "complex - 64 bits";
+        break;
+    case 64:
+        result = "double - 64 bits";
+        break;
+    case 128:
+        result = "rgb - 24 bits";
+        break;
+    case 255:
+        result = "all - 255";
+        break;
+    case 256:
+        result = "signed char - 8 bits";
+        break;
+    case 512:
+        result = "unsigned short - 16 bits";
+        break;
+    case 768:
+        result = "unsigned int - 32 bits";
+        break;
+    case 1024:
+        result = "long long - 64 bits";
+        break;
+    case 1280:
+        result = "unsigned long long - 64 bits";
+        break;
+    case 1536:
+        result = "long double - 128 bits";
+        break;
+    case 1792:
+        result = "double pair - 128 bits";
+        break;
+    case 2048:
+        result = "long double pair - 256 bits";
+        break;
+    case 2304:
+        result = "rgba - 32 bits";
+        break;
+    default:
+        result = "Unknown data type.";
+        break;
     }
 
     return result;
 }
 
-std::string orientationTypeToString(int coordinateType) {
+std::string orientationTypeToString(int coordinateType)
+{
     std::string result;
 
-    switch (coordinateType) {
-        case 0:
-            result = "Unknown";
-            break;
-        case 1:
-            result = "Scanner";
-            break;
-        case 2:
-            result = "Aligned";
-            break;
-        case 3:
-            result = "Talairach";
-            break;
-        case 4:
-            result = "MNI_152";
-            break;
-        default:
-            result = "Illegal code";
-            break;
+    switch (coordinateType)
+    {
+    case 0:
+        result = "Unknown";
+        break;
+    case 1:
+        result = "Scanner";
+        break;
+    case 2:
+        result = "Aligned";
+        break;
+    case 3:
+        result = "Talairach";
+        break;
+    case 4:
+        result = "MNI_152";
+        break;
+    default:
+        result = "Illegal code";
+        break;
     }
 
     return result;
@@ -230,14 +235,15 @@ void loadAndSliceNifti()
         exit(1);
     }
 
-
     int DIMX = NII->nx;
     int DIMY = NII->ny;
     int DIMZ = NII->nz;
 
-    if (SLICE_INDEX >= DIMZ) SLICE_INDEX = SLICE_INDEX - DIMZ; // wrapp around if exceed the z-dimension boundary
-    if (SLICE_INDEX < 0)  SLICE_INDEX = DIMZ + SLICE_INDEX; // wrapp around if exceed the z-dimension boundary
-    
+    if (SLICE_INDEX >= DIMZ)
+        SLICE_INDEX = SLICE_INDEX - DIMZ; // wrapp around if exceed the z-dimension boundary
+    if (SLICE_INDEX < 0)
+        SLICE_INDEX = DIMZ + SLICE_INDEX; // wrapp around if exceed the z-dimension boundary
+
     int sliceIndex = SLICE_INDEX;
 
     Eigen::MatrixXd sliceMatrix(DIMX, DIMY);

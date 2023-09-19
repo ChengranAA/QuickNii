@@ -2,8 +2,8 @@
 #include <math.h>
 #include <filesystem>
 
-int INITIAL_X = 500;
-int INITIAL_Y = 200;
+int INITIAL_X = 800;
+int INITIAL_Y = 400;
 
 int HEADER_WIN_W = 400;
 int HEADER_WIN_H = 710;
@@ -30,7 +30,7 @@ void display_text_gl(std::string text, int x, int y)
     }
 }
 
-void wrapTextAndDisplay(const std::string& text, int x, int& yOffset, int maxWidth)
+void wrapTextAndDisplay(const std::string &text, int x, int &yOffset, int maxWidth)
 {
     int textLength = text.length();
     int lineStart = 0;
@@ -57,7 +57,6 @@ void wrapTextAndDisplay(const std::string& text, int x, int& yOffset, int maxWid
     }
 }
 
-
 void renderHeader()
 {
     glMatrixMode(GL_PROJECTION);
@@ -78,12 +77,11 @@ void renderHeader()
     display_text_gl("File Name: ", 10, yOffset);
     wrapTextAndDisplay(filePath.filename().string(), 75, yOffset, 370);
 
-    display_text_gl("-------------------------------------", 10, yOffset);
+    display_text_gl("-------------------------------------------", 10, yOffset);
     yOffset += line_w;
 
     display_text_gl("sizeof_hdr: " + std::to_string(NII_HEADER.sizeof_hdr), 10, yOffset);
     yOffset += line_w;
-
 
     display_text_gl("dim_info: " + std::to_string(NII_HEADER.dim_info), 10, yOffset);
     yOffset += line_w;
@@ -97,7 +95,7 @@ void renderHeader()
         if (i == 3)
         {
             yOffset += line_w,
-            xOffset = 30;
+                xOffset = 30;
         }
         else
         {
@@ -141,7 +139,7 @@ void renderHeader()
         if (i == 3)
         {
             yOffset += line_w,
-            xOffset = 30;
+                xOffset = 30;
         }
         else
         {
@@ -199,13 +197,13 @@ void renderHeader()
     display_text_gl("sform_code: " + sform_text, 10, yOffset);
     yOffset += line_w;
 
-    display_text_gl("quatern_b: " +std::to_string(NII_HEADER.quatern_b), 10, yOffset);
+    display_text_gl("quatern_b: " + std::to_string(NII_HEADER.quatern_b), 10, yOffset);
     yOffset += line_w;
 
-    display_text_gl("quatern_c: " +std::to_string(NII_HEADER.quatern_c), 10, yOffset);
+    display_text_gl("quatern_c: " + std::to_string(NII_HEADER.quatern_c), 10, yOffset);
     yOffset += line_w;
 
-    display_text_gl("quatern_d: " +std::to_string(NII_HEADER.quatern_d), 10, yOffset);
+    display_text_gl("quatern_d: " + std::to_string(NII_HEADER.quatern_d), 10, yOffset);
     yOffset += line_w;
 
     display_text_gl("qoffset_x: " + std::to_string(NII_HEADER.qoffset_x), 10, yOffset);
@@ -272,13 +270,12 @@ void toggleHeaderWindow()
 
         // Create a new window for the header
         glutInitWindowPosition(headerWindowX, headerWindowY);
-        headerWindowID = glutCreateWindow("Header");
+        headerWindowID = glutCreateWindow("Header Information");
         glClearColor(0.3, 0.3, 0.3, 0);
         glutDisplayFunc(displayH);                     // Set the display function for the header window
         glutKeyboardFunc(keyboard);                    // Allow keyboard input for the header window
         glutReshapeWindow(HEADER_WIN_W, HEADER_WIN_H); // Set the window size
         headerWindowVisible = true;
-
     }
 }
 

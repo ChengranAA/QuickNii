@@ -18,10 +18,10 @@
 #include "nifti1_io.h"
 #include "znzlib.h"
 
-extern char * FILE_PATH;
+extern char *FILE_PATH;
 extern int SLICE_INDEX;
 extern Eigen::MatrixXd SLICE;
-extern nifti_image * NII;
+extern nifti_image *NII;
 extern double rotationAngle;
 extern nifti_1_header NII_HEADER;
 
@@ -30,11 +30,10 @@ extern GLuint textureID;
 
 void read_nifti_file();
 void loadAndSliceNifti();
-void initializeGL(int argc, char** argv);
+void initializeGL(int argc, char **argv);
 void print_nifti_header(nifti_image *nii);
 std::string orientationTypeToString(int coordinateType);
 std::string dataTypeToString(int dataType);
 std::string sliceOrderToString(int sliceOrder);
-
 
 #endif
