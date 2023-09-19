@@ -1,26 +1,173 @@
 #include "quicknii.h"
 int SLICE_INDEX = 0;
 
-void readFirst348Bytes(const char *filename, nifti_1_header * ret)
+std::string sliceOrderToString(int sliceOrder) {
+    std::string result;
+
+    switch (sliceOrder) {
+        case 0:
+            result = "Slice order unknown";
+            break;
+        case 1:
+            result = "Sequential, increasing";
+            break;
+        case 2:
+            result = "Sequential, decreasing";
+            break;
+        case 3:
+            result = "Interleaved, increasing, starting at the 1st MRI slice";
+            break;
+        case 4:
+            result = "Interleaved, decreasing, starting at the last MRI slice";
+            break;
+        case 5:
+            result = "Interleaved, increasing, starting at the 2nd MRI slice";
+            break;
+        case 6:
+            result = "Interleaved, decreasing, starting at one before the last MRI slice";
+            break;
+        default:
+            result = "Unknown slice order";
+            break;
+    }
+
+    return result;
+}
+
+
+std::string dataTypeToString(int dataType) {
+    std::string result;
+
+    switch (dataType) {
+        case 0:
+            result = "unknown - 0";
+            break;
+        case 1:
+            result = "bool - 1 bit";
+            break;
+        case 2:
+            result = "unsigned char - 8 bits";
+            break;
+        case 4:
+            result = "signed short - 16 bits";
+            break;
+        case 8:
+            result = "signed int - 32 bits";
+            break;
+        case 16:
+            result = "float - 32 bits";
+            break;
+        case 32:
+            result = "complex - 64 bits";
+            break;
+        case 64:
+            result = "double - 64 bits";
+            break;
+        case 128:
+            result = "rgb - 24 bits";
+            break;
+        case 255:
+            result = "all - 255";
+            break;
+        case 256:
+            result = "signed char - 8 bits";
+            break;
+        case 512:
+            result = "unsigned short - 16 bits";
+            break;
+        case 768:
+            result = "unsigned int - 32 bits";
+            break;
+        case 1024:
+            result = "long long - 64 bits";
+            break;
+        case 1280:
+            result = "unsigned long long - 64 bits";
+            break;
+        case 1536:
+            result = "long double - 128 bits";
+            break;
+        case 1792:
+            result = "double pair - 128 bits";
+            break;
+        case 2048:
+            result = "long double pair - 256 bits";
+            break;
+        case 2304:
+            result = "rgba - 32 bits";
+            break;
+        default:
+            result = "Unknown data type.";
+            break;
+    }
+
+    return result;
+}
+
+std::string orientationTypeToString(int coordinateType) {
+    std::string result;
+
+    switch (coordinateType) {
+        case 0:
+            result = "Unknown";
+            break;
+        case 1:
+            result = "Scanner";
+            break;
+        case 2:
+            result = "Aligned";
+            break;
+        case 3:
+            result = "Talairach";
+            break;
+        case 4:
+            result = "MNI_152";
+            break;
+        default:
+            result = "Illegal code";
+            break;
+    }
+
+    return result;
+}
+
+void readFirst348Bytes(const char *filename, nifti_1_header *ret)
 {
-    FILE *file = fopen(filename, "rb"); // Open the file in binary mode for reading
-    if (file == NULL)
+    int use_compression = 0; // Default to no compression
+
+    // Check if the file is a zip file by examining its extension
+    const char *file_extension = strrchr(filename, '.');
+    if (file_extension != NULL && strcmp(file_extension, ".gz") == 0)
+    {
+        use_compression = 1; // Set to use compression for .gz files
+    }
+
+    znzFile file = znzopen(filename, "rb", use_compression ? 1 : 0);
+    if (znz_isnull(file))
     {
         printf("Failed to open the file.\n");
         return;
     }
 
-    size_t bytesRead = fread(ret, sizeof(char), sizeof(nifti_1_header), file);
+    size_t bytesRead;
+    if (use_compression)
+    {
+        // Use znzread for zip files
+        bytesRead = znzread(ret, sizeof(char), sizeof(nifti_1_header), file);
+    }
+    else
+    {
+        // Use regular fread for non-zip files
+        bytesRead = fread(ret, sizeof(char), sizeof(nifti_1_header), file->nzfptr);
+    }
+
     if (bytesRead < sizeof(nifti_1_header))
     {
         printf("Failed to read the first 384 bytes of the file.\n");
-        fclose(file);
-        return;
     }
 
-    fclose(file);
+    znzclose(file);
 }
-
 
 // a function to read a nifti file into nifti_image struct
 void read_nifti_file()
@@ -46,7 +193,7 @@ void print_nifti_header(nifti_image *nii)
     if (nii == NULL)
     {
         std::cout << "Error reading NIfTI image header" << std::endl;
-        return;
+        exit(0);
     }
 
     // Print the header information

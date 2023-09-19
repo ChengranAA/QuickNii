@@ -6,7 +6,7 @@ int INITIAL_X = 500;
 int INITIAL_Y = 200;
 
 int HEADER_WIN_W = 400;
-int HEADER_WIN_H = 200;
+int HEADER_WIN_H = 710;
 
 GLuint textureID;
 nifti_image *NII;
@@ -30,11 +30,39 @@ void display_text_gl(std::string text, int x, int y)
     }
 }
 
+void wrapTextAndDisplay(const std::string& text, int x, int& yOffset, int maxWidth)
+{
+    int textLength = text.length();
+    int lineStart = 0;
+    int lineEnd = 0;
+
+    while (lineStart < textLength)
+    {
+        // Find the end of the current line
+        lineEnd = lineStart;
+        int lineWidth = 0;
+
+        while (lineEnd < textLength && lineWidth + glutBitmapWidth(GLUT_BITMAP_HELVETICA_12, text[lineEnd]) <= maxWidth)
+        {
+            lineWidth += glutBitmapWidth(GLUT_BITMAP_HELVETICA_12, text[lineEnd]);
+            lineEnd++;
+        }
+
+        // Display the current line
+        display_text_gl(text.substr(lineStart, lineEnd - lineStart), x, yOffset);
+        yOffset += 15; // Adjust as needed
+
+        // Update lineStart for the next line
+        lineStart = lineEnd;
+    }
+}
+
+
 void renderHeader()
 {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0, HEADER_WIN_W, HEADER_WIN_H + glutGet(GLUT_WINDOW_HEIGHT), 0);
+    gluOrtho2D(0, HEADER_WIN_W, HEADER_WIN_H, 0);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -43,28 +71,19 @@ void renderHeader()
     glColor3f(0, 0.8, 0);
 
     int yOffset = 20; // Starting y-coordinate for text
-    int line_w = 20;
+    int line_w = 15;
     int xOffset = 30;
     // Display each header field using display_text_gl
     std::__fs::filesystem::path filePath = FILE_PATH;
-    display_text_gl("File Name: " + filePath.filename().string(), 10, yOffset);
+    display_text_gl("File Name: ", 10, yOffset);
+    wrapTextAndDisplay(filePath.filename().string(), 75, yOffset, 370);
+
+    display_text_gl("-------------------------------------", 10, yOffset);
     yOffset += line_w;
 
     display_text_gl("sizeof_hdr: " + std::to_string(NII_HEADER.sizeof_hdr), 10, yOffset);
     yOffset += line_w;
 
-    display_text_gl("data_type: " + std::string(NII_HEADER.data_type), 10, yOffset);
-    yOffset += line_w;
-
-    // Add the rest of the fields in the same manner
-    display_text_gl("extents: " + std::to_string(NII_HEADER.extents), 10, yOffset);
-    yOffset += line_w;
-
-    display_text_gl("session_error: " + std::to_string(NII_HEADER.session_error), 10, yOffset);
-    yOffset += line_w;
-
-    display_text_gl("regular: " + std::to_string(NII_HEADER.regular), 10, yOffset);
-    yOffset += line_w;
 
     display_text_gl("dim_info: " + std::to_string(NII_HEADER.dim_info), 10, yOffset);
     yOffset += line_w;
@@ -99,7 +118,8 @@ void renderHeader()
     display_text_gl("intent_code: " + std::to_string(NII_HEADER.intent_code), 10, yOffset);
     yOffset += line_w;
 
-    display_text_gl("datatype: " + std::to_string(NII_HEADER.datatype), 10, yOffset);
+    std::string datatype_text = dataTypeToString(NII_HEADER.datatype);
+    display_text_gl("datatype: " + datatype_text, 10, yOffset);
     yOffset += line_w;
 
     display_text_gl("bitpix: " + std::to_string(NII_HEADER.bitpix), 10, yOffset);
@@ -139,11 +159,63 @@ void renderHeader()
     display_text_gl("scl_inter: " + std::to_string(NII_HEADER.scl_inter), 10, yOffset);
     yOffset += line_w;
 
-    // Continue adding the remaining fields in a similar manner
-    // ...
+    display_text_gl("slice_end: " + std::to_string(NII_HEADER.slice_end), 10, yOffset);
+    yOffset += line_w;
 
-    // Update yOffset for the last section of text
-    yOffset += 20;
+    std::string slice_code_text = sliceOrderToString(NII_HEADER.slice_code);
+    display_text_gl("slice_code: " + slice_code_text, 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("xyzt_units: " + std::to_string(NII_HEADER.xyzt_units), 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("cal_max: " + std::to_string(NII_HEADER.cal_max), 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("cal_min: " + std::to_string(NII_HEADER.cal_min), 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("slice_duration: " + std::to_string(NII_HEADER.slice_duration), 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("toffset: " + std::to_string(NII_HEADER.toffset), 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("Description: ", 10, yOffset);
+    yOffset += line_w;
+    wrapTextAndDisplay(NII_HEADER.descrip, 10, yOffset, 370); // Adjust maxWidth as needed
+    yOffset += line_w;
+
+    display_text_gl("aux_file: ", 10, yOffset);
+    yOffset += line_w;
+    wrapTextAndDisplay(NII_HEADER.aux_file, 10, yOffset, 370); // Adjust maxWidth as needed
+    yOffset += line_w;
+
+    std::string qform_text = orientationTypeToString(NII_HEADER.qform_code);
+    display_text_gl("qform_code: " + qform_text, 10, yOffset);
+    yOffset += line_w;
+
+    std::string sform_text = orientationTypeToString(NII_HEADER.sform_code);
+    display_text_gl("sform_code: " + sform_text, 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("quatern_b: " +std::to_string(NII_HEADER.quatern_b), 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("quatern_c: " +std::to_string(NII_HEADER.quatern_c), 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("quatern_d: " +std::to_string(NII_HEADER.quatern_d), 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("qoffset_x: " + std::to_string(NII_HEADER.qoffset_x), 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("qoffset_y: " + std::to_string(NII_HEADER.qoffset_y), 10, yOffset);
+    yOffset += line_w;
+
+    display_text_gl("qoffset_z: " + std::to_string(NII_HEADER.qoffset_z), 10, yOffset);
+    yOffset += line_w;
 
     // Display the srow_x, srow_y, and srow_z arrays
     display_text_gl("srow_x: ", 10, yOffset);
@@ -193,7 +265,6 @@ void toggleHeaderWindow()
         // Get the position and size of the main window
         int mainWindowX = glutGet(GLUT_WINDOW_X);
         int mainWindowY = glutGet(GLUT_WINDOW_Y);
-        int mainWindowHeight = glutGet(GLUT_WINDOW_HEIGHT);
 
         // Calculate the position for the header window to the left of the main window
         int headerWindowX = mainWindowX - HEADER_WIN_W;
@@ -205,7 +276,7 @@ void toggleHeaderWindow()
         glClearColor(0.3, 0.3, 0.3, 0);
         glutDisplayFunc(displayH);                     // Set the display function for the header window
         glutKeyboardFunc(keyboard);                    // Allow keyboard input for the header window
-        glutReshapeWindow(HEADER_WIN_W, mainWindowHeight + HEADER_WIN_H); // Set the window size
+        glutReshapeWindow(HEADER_WIN_W, HEADER_WIN_H); // Set the window size
         headerWindowVisible = true;
 
     }
