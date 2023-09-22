@@ -6,7 +6,7 @@ int INITIAL_X = 800;
 int INITIAL_Y = 400;
 
 int HEADER_WIN_W = 400;
-int HEADER_WIN_H = 710;
+int HEADER_WIN_H = 750;
 
 GLuint textureID;
 nifti_image *NII;
@@ -75,7 +75,7 @@ void renderHeader()
     // Display each header field using display_text_gl
     std::__fs::filesystem::path filePath = FILE_PATH;
     display_text_gl("File Name: ", 10, yOffset);
-    wrapTextAndDisplay(filePath.filename().string(), 75, yOffset, 370);
+    wrapTextAndDisplay(filePath.filename().string(), 75, yOffset, 300);
 
     display_text_gl("-------------------------------------------", 10, yOffset);
     yOffset += line_w;
