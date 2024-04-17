@@ -1,3 +1,14 @@
+build/
+include/imgui/
+include/implot/
+include/nifti_clib/
+lib/
+test-data/
+.vscode/
+compile_commands.json
+
+quicknii
+
 # Prerequisites
 *.d
 
