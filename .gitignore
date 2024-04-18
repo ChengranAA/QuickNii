@@ -5,7 +5,9 @@ include/nifti_clib/
 lib/
 test-data/
 .vscode/
+python-validations/
 compile_commands.json
+imgui.ini
 
 quicknii
 
