@@ -20,21 +20,24 @@ QuickNii is a simple NIfTI file viewer that allows you to quickly view NIfTI fil
 - Metadata display
 - Efficient orientation transformation to RAS
 
-## Installation
-(brew intall comming soon)
-
 ## Usage
 ```
 QuickNii <NIfTI file> // that's it
 ```
 
 ## Development
+Clone the repository and run the following commands:
 ```
 chmod +x init.sh && ./init.sh
 make
 ```
 The init.sh script will download the necessary dependencies and build the project. The make command will build the project and create the QuickNii executable in the build directory.
 
+To install the executable, run the following command:
+```
+make install
+```
+It require sudo user privileges to install the executable.
 
 ## License
 MIT License

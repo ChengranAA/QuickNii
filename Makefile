@@ -66,3 +66,9 @@ clean:
 
 clean_ini:
 	rm -f imgui.ini
+
+install:
+	sudo cp $(EXE) /usr/local/bin
+
+uninstall:
+	sudo rm -f /usr/local/bin/$(EXE)
