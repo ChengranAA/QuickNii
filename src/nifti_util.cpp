@@ -276,6 +276,16 @@ std::vector<GLuint> nifti_image_to_slices_gl(nifti_image *nim)
 
     // Copy the data to the placeholders
     // note: the data is fortran ordered, so the data is stored in the following way: data[x + y * width + z * width * height]
+
+    // let's bound the index to the image size
+    if (AX_SLICE_IDX < 0)
+    {
+        AX_SLICE_IDX = 0;
+    }
+    else if (AX_SLICE_IDX >= nim->dim[3])
+    {
+        AX_SLICE_IDX = nim->dim[3] - 1;
+    }
     
     memcpy(ax_placeholder, (float *)nim->data + AX_SLICE_IDX * AX_SLICE.width * AX_SLICE.height, AX_SLICE.width * AX_SLICE.height * sizeof(float));
 
@@ -284,21 +294,39 @@ std::vector<GLuint> nifti_image_to_slices_gl(nifti_image *nim)
     {
         for (int x = 0; x < COR_SLICE.width; x++)
         {
+            // let's bound the index to the image size
+            if (COR_SLICE_IDX < 0)
+            {
+                COR_SLICE_IDX = 0;
+            }
+            else if (COR_SLICE_IDX >= nim->dim[3])
+            {
+                COR_SLICE_IDX = nim->dim[3] - 1;
+            }
             int index = x + (COR_SLICE_IDX * nim->dim[1]) + (z * nim->dim[1] * nim->dim[2]);
             cor_placeholder[x + z * COR_SLICE.width] = ((float *)nim->data)[index];
         }
     }
 
     // Sagittal slice
-   for (int z = 0; z < SAG_SLICE.height; z++)
-{
-    for (int y = 0; y < SAG_SLICE.width; y++)
+    for (int z = 0; z < SAG_SLICE.height; z++)
     {
-        int index = (SAG_SLICE_IDX) + (y * nim->dim[1]) + (z * nim->dim[1] * nim->dim[2]);
-        sag_placeholder[y + z * SAG_SLICE.width] = ((float *)nim->data)[index];
-    }
-}
+        for (int y = 0; y < SAG_SLICE.width; y++)
+        {
+            // let's bound the index to the image size
+            if (SAG_SLICE_IDX < 0)
+            {
+                SAG_SLICE_IDX = 0;
+            }
+            else if (SAG_SLICE_IDX >= nim->dim[2])
+            {
+                SAG_SLICE_IDX = nim->dim[2] - 1;
+            }
 
+            int index = SAG_SLICE_IDX + (y * nim->dim[1]) + (z * nim->dim[1] * nim->dim[2]);
+            sag_placeholder[y + z * SAG_SLICE.width] = ((float *)nim->data)[index];
+        }
+    }
 
     // normalize the data
     normalize_data(ax_placeholder, AX_SLICE.width * AX_SLICE.height);

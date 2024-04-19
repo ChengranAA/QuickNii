@@ -24,9 +24,6 @@ int main(int argc, char** argv)
     COR_SLICE_IDX = nim->dim[2] / 2;
     AX_SLICE_IDX = nim->dim[3] / 2;
 
-    // slice the nifti image
-    // nifti_image_to_slices_gl(nim);
-
     // start the GUIs
 
     if(quickniiGUI(argc, argv, nim) != 0){

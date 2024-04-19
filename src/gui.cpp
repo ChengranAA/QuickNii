@@ -98,11 +98,11 @@ int quickniiGUI(int argc, char** argv, nifti_image* nim)
 					// static ImVec4 cur3D;
 					ImVec4 boundMin(0.0f, 0.0f, 0.0f, 0.0f);
 					ImVec4 boundMax((float) NII_DIM[0], (float) NII_DIM[1], (float) NII_DIM[2], 0.0f);
-					if (SliderScalar3D("Navigator", &COR_SLICE_IDX, &SAG_SLICE_IDX, &AX_SLICE_IDX,
+					if (SliderScalar3D("Navigator", &SAG_SLICE_IDX ,&COR_SLICE_IDX, &AX_SLICE_IDX,
 						boundMin.x, boundMax.x,
 						boundMin.y, boundMax.y,
 						boundMin.z, boundMax.z,
-						0.9f)) {
+						1.0f)) {
                             // delete the old texture which is a GLuInt[3]
                             glDeleteTextures(3, &sliceTexture[0]);
                             sliceTexture = nifti_image_to_slices_gl(nim);

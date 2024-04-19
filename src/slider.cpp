@@ -64,8 +64,16 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
 
   ImGui::PushID(iID);
 
-  ImU32 const uFrameCol = ImGui::GetColorU32(ImGuiCol_FrameBg) | 0xFF000000;
-  ImU32 const uFrameCol2 = ImGui::GetColorU32(ImGuiCol_FrameBgActive);
+  //ImU32 const uFrameCol = ImGui::GetColorU32(ImGuiCol_FrameBg) | 0xFF000000;
+
+  ImVec4 const vGrey(128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f, 1.0f);
+  ImVec4 const vLightGrey(50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f, 1.0f);
+  ImVec4 const vLightBlue(50.0f / 255.0f, 50.0f / 255.0f, 70.0f / 255.0f, 0.8f);
+  
+  ImU32 const uFrameCol = ImGui::GetColorU32(vLightBlue);
+  ImU32 const uFrameCol2 = ImGui::GetColorU32(vGrey);
+  ImU32 const uFrameCol3 = ImGui::GetColorU32(vLightGrey);
+  
 
   int &fX = *pValueX;
   int &fY = *pValueY;
@@ -75,7 +83,7 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
   float const fDeltaY = fMaxY - fMinY;
   float const fDeltaZ = fMaxZ - fMinZ;
 
-  ImVec2 const vOriginPos = ImGui::GetCursorScreenPos();
+  // ImVec2 const vOriginPos = ImGui::GetCursorScreenPos();
 
   ImDrawList *pDrawList = ImGui::GetWindowDrawList();
 
@@ -97,13 +105,13 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
   // Cube Shape
   pDrawList->AddLine(
       oRect.Min + ImVec2(0.0f, vSize.y),
-      oRect.Min + ImVec2(fX3, 2.0f * fY3), uFrameCol2, 1.0f);
+      oRect.Min + ImVec2(fX3, 2.0f * fY3), uFrameCol3, 1.0f);
   pDrawList->AddLine(
       oRect.Min + ImVec2(fX3, 2.0f * fY3),
-      oRect.Min + ImVec2(vSize.x, 2.0f * fY3), uFrameCol2, 1.0f);
+      oRect.Min + ImVec2(vSize.x, 2.0f * fY3), uFrameCol3, 1.0f);
   pDrawList->AddLine(
       oRect.Min + ImVec2(fX3, 0.0f),
-      oRect.Min + ImVec2(fX3, 2.0f * fY3), uFrameCol2, 1.0f);
+      oRect.Min + ImVec2(fX3, 2.0f * fY3), uFrameCol3, 1.0f);
 
   ImGui::PopID();
 
@@ -112,13 +120,13 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
   ImRect oZDragRect(ImVec2(vStart.x + 2.0f * fX3 + fDragZOffsetX, vStart.y + 2.0f * fY3), ImVec2(vStart.x + vSize.x + fDragZOffsetX, vStart.y + vSize.y));
 
   ImVec2 const vMousePos = ImGui::GetMousePos();
-  ImVec2 const vSecurity(15.0f, 15.0f);
+  ImVec2 const vSecurity(7.0f, 7.0f);
   ImVec2 const vDragStart(oZDragRect.Min.x, oZDragRect.Max.y);
   ImVec2 const vDragEnd(oZDragRect.Max.x, oZDragRect.Min.y);
-  ImRect frame_bb = ImRect(oRect.Min - vSecurity, oRect.Max + vSecurity);
+  // ImRect frame_bb = ImRect(oRect.Min - vSecurity, oRect.Max + vSecurity);
   bool bModified = false;
-  bool hovered;
-  bool held;
+  //bool hovered;
+  // bool held;
   if (ImGui::IsMouseHoveringRect(oZDragRect.Min - vSecurity, oZDragRect.Max + vSecurity) && ImGui::IsMouseDown(ImGuiMouseButton_Left))
   //bool pressed = ImGui::ButtonBehavior(oZDragRect, ImGui::GetID("##HandleZ"), &hovered, &held);
   //if (hovered && held)
@@ -168,11 +176,11 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
   float const fScaleX = (fX - fMinX) / fDeltaX;
   float const fScaleY = 1.0f - (fY - fMinY) / fDeltaY;
 
-  ImVec4 const vBlue(70.0f / 255.0f, 102.0f / 255.0f, 230.0f / 255.0f, 1.0f);
-  ImVec4 const vOrange(255.0f / 255.0f, 128.0f / 255.0f, 64.0f / 255.0f, 1.0f);
+  ImVec4 const vBlue(70.0f / 255.0f, 50.0f / 255.0f, 230.0f / 255.0f, 1.0f);
+  ImVec4 const vOrange(0.0f / 255.0f, 200.0f / 255.0f, 0.0f / 255.0f, 1.0f);
 
-  ImS32 const uBlue = ImGui::GetColorU32(vBlue);
-  ImS32 const uOrange = ImGui::GetColorU32(vOrange);
+  ImS32 const uBlue = ImGui::GetColorU32(vBlue); 
+  ImS32 const uOrange = ImGui::GetColorU32(vOrange); // not actually orange, there is too many uOrange reference in the code to change it now
 
   constexpr float fBorderThickness = 2.0f;  // TODO: move as Style
   constexpr float fLineThickness = 3.0f;    // TODO: move as Style
@@ -207,7 +215,7 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
 
   ImVec2 const vXSize = ImGui::CalcTextSize(pBufferX);
   ImVec2 const vYSize = ImGui::CalcTextSize(pBufferY);
-  ImVec2 const vZSize = ImGui::CalcTextSize(pBufferZ);
+  // ImVec2 const vZSize = ImGui::CalcTextSize(pBufferZ);
 
   ImVec2 const vTextSlideXMin = oRect.Min + ImVec2(0.0f, vSize.y);
   ImVec2 const vTextSlideXMax = oRect.Min + ImVec2(2.0f * fX3, vSize.y);
@@ -224,8 +232,8 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
   ImVec2 const vHandlePosX = vXTextPos + ImVec2(0.0f, vXSize.y + fHandleOffsetCoef * fCursorOff);
   ImVec2 const vHandlePosY = vYTextPos + ImVec2(vYSize.x + (fHandleOffsetCoef + 1.0f) * fCursorOff, 0.0f);
 
-  ImRect handle_x_bb = ImRect(vHandlePosX - ImVec2(fHandleRadius, fHandleRadius) - vSecurity, vHandlePosX + ImVec2(fHandleRadius, fHandleRadius) + vSecurity);
-  ImRect handle_y_bb = ImRect(vHandlePosY - ImVec2(fHandleRadius, fHandleRadius) - vSecurity, vHandlePosY + ImVec2(fHandleRadius, fHandleRadius) + vSecurity);
+  // ImRect handle_x_bb = ImRect(vHandlePosX - ImVec2(fHandleRadius, fHandleRadius) - vSecurity, vHandlePosX + ImVec2(fHandleRadius, fHandleRadius) + vSecurity);
+  // ImRect handle_y_bb = ImRect(vHandlePosY - ImVec2(fHandleRadius, fHandleRadius) - vSecurity, vHandlePosY + ImVec2(fHandleRadius, fHandleRadius) + vSecurity);
   // ImRect handle_z_bb = ImRect(vHandlePosY - ImVec2(fHandleRadius, fHandleRadius) - vSecurity, vHandlePosY + ImVec2(fHandleRadius, fHandleRadius) + vSecurity);
 
   if (ImGui::IsMouseHoveringRect(vHandlePosX - ImVec2(fHandleRadius, fHandleRadius) - vSecurity, vHandlePosX + ImVec2(fHandleRadius, fHandleRadius) + vSecurity) &&
@@ -347,9 +355,9 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
   // CursorZ
   pDrawList->AddNgonFilled((vDragEnd - vDragStart) * fScaleZ + vDragStart, fHandleRadius, uBlue, 4);
 
-  ImGui::Dummy(vHeightOffset);
-  ImGui::Dummy(vHeightOffset * 1.25f);
-  ImGui::Dummy(vSize);
+  //ImGui::Dummy(vHeightOffset);
+  //ImGui::Dummy(vHeightOffset * 1.25f);
+  //ImGui::Dummy(vSize);
 
   return bModified;
 }
