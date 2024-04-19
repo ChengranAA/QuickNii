@@ -1,5 +1,110 @@
 #include "quicknii.hpp"
 
+// === Internal functions ===
+// wrapper for nifti_image_free
+void internal_image_free(internal_nim *nim)
+{
+    free(nim->data);
+    free(nim);
+}
+
+// helper function to normalize the data with a pointer to the data and the size of the data
+void normalize_data(float *data, int size)
+{
+    float min = data[0];
+    float max = data[0];
+    for (int i = 0; i < size; i++)
+    {
+        if (data[i] < min)
+        {
+            min = data[i];
+        }
+        if (data[i] > max)
+        {
+            max = data[i];
+        }
+    }
+
+    for (int i = 0; i < size; i++)
+    {
+        data[i] = (data[i] - min) / (max - min);
+    }
+}
+
+// helper function to flip the data in the y axis
+void flip_data(float *data, int width, int height)
+{
+    float *temp = (float *)malloc(width * sizeof(float));
+    if (!temp)
+    {
+        printf("Failed to allocate memory for temp\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < height / 2; i++)
+    {
+        memcpy(temp, data + i * width, width * sizeof(float));
+        memcpy(data + i * width, data + (height - i - 1) * width, width * sizeof(float));
+        memcpy(data + (height - i - 1) * width, temp, width * sizeof(float));
+    }
+
+    free(temp);
+}
+
+// === BV functions ===
+internal_nim *wrapper_bv_image_read(const char *filename, const char *ext)
+{
+    internal_nim *i_nim = (internal_nim *)malloc(sizeof(*i_nim));
+    if (!i_nim)
+    {
+        printf("Failed to allocate memory for internal_nim\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // read the vmr file
+    if (strcmp(ext, "vmr") == 0)
+    {
+        VMR nim = read_vmr(filename);
+        // set global variable NII_DIM
+        NII_DIM[0] = nim.DimX;
+        NII_DIM[1] = nim.DimY;
+        NII_DIM[2] = nim.DimZ;
+
+        // copy the dimensions
+        i_nim->ext = ext_VMR;
+        i_nim->dim[0] = 3;
+        i_nim->dim[1] = nim.DimX;
+        i_nim->dim[2] = nim.DimY;
+        i_nim->dim[3] = nim.DimZ;
+        i_nim->dim[4] = 1; // fill up deault value for the 4th dimension
+
+        // copy the data to the internal nim and convert it to float (since the data store is char, we are not worried about the limit here)
+        i_nim->data = (float *)malloc(nim.DimX * nim.DimY * nim.DimZ * sizeof(float));
+        if (!i_nim->data)
+        {
+            printf("Failed to allocate memory for data\n");
+            exit(EXIT_FAILURE);
+        }
+
+        for (int i = 0; i < nim.DimX * nim.DimY * nim.DimZ; i++) {
+            i_nim->data[i] = (float)nim.data[i];
+        }
+        
+        free_vmr(nim);
+        return i_nim;
+    }
+    else if (strcmp(ext, "v16") == 0)
+    {
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        exit(EXIT_FAILURE);
+    }
+}
+
+//  === Nifti functions ===
+
 // wrapper for nifti_read_header
 nifti_1_header *wrapper_nifti_read_header(const char *filename)
 {
@@ -9,20 +114,40 @@ nifti_1_header *wrapper_nifti_read_header(const char *filename)
 }
 
 // wrapper for nifti_image_read
-nifti_image *wrapper_nifti_image_read(const char *filename)
+internal_nim *wrapper_nifti_image_read(const char *filename)
 {
-    nifti_image *nim;
-    nim = nifti_image_read(filename, 1);
+    nifti_image *nim = nifti_image_read(filename, 1);
+    nifti_image_to_float(nim);
+
+    // set the global variable NII_DIM
     NII_DIM[0] = nim->nx;
     NII_DIM[1] = nim->ny;
     NII_DIM[2] = nim->nz;
-    return nim;
-}
 
-// wrapper for nifti_image_free
-void wrapper_nifti_image_free(nifti_image *nim)
-{
+    // check if the data correctly converted to float by printing the first 10 elements
+    internal_nim *i_nim = (internal_nim *)malloc(sizeof(*i_nim));
+
+    if (!i_nim)
+    {
+        printf("Failed to allocate memory for internal_nim\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // copy the dimensions
+    i_nim->ext = ext_NII;
+    i_nim->dim[0] = nim->ndim;
+    i_nim->dim[1] = nim->nx;
+    i_nim->dim[2] = nim->ny;
+    i_nim->dim[3] = nim->nz;
+    i_nim->dim[4] = nim->nt;
+
+    // copy the data to the internal nim
+    i_nim->data = (float *)malloc(nim->nvox * sizeof(float));
+    memcpy(i_nim->data, nim->data, nim->nvox * sizeof(float));
+
+    // free the nifti_image we don't need it anymore
     nifti_image_free(nim);
+    return i_nim;
 }
 
 // wrapper to get the affine matrix
@@ -196,52 +321,7 @@ void nifti_image_to_ras(nifti_image *nim)
 // the first three fields are the width, height, index of the slice will unambiously tell us the size of the data field calculated as width*height*sizeof(float)
 
 // this function will also take the slice to a opengl texture
-
-// helper function to normalize the data with a pointer to the data and the size of the data
-void normalize_data(float *data, int size)
-{
-    float min = data[0];
-    float max = data[0];
-    for (int i = 0; i < size; i++)
-    {
-        if (data[i] < min)
-        {
-            min = data[i];
-        }
-        if (data[i] > max)
-        {
-            max = data[i];
-        }
-    }
-
-    for (int i = 0; i < size; i++)
-    {
-        data[i] = (data[i] - min) / (max - min);
-    }
-}
-
-// helper function to flip the data in the y axis
-void flip_data(float *data, int width, int height)
-{
-    float *temp = (float *)malloc(width * sizeof(float));
-    if (!temp)
-    {
-        printf("Failed to allocate memory for temp\n");
-        exit(EXIT_FAILURE);
-    }
-
-    for (int i = 0; i < height / 2; i++)
-    {
-        memcpy(temp, data + i * width, width * sizeof(float));
-        memcpy(data + i * width, data + (height - i - 1) * width, width * sizeof(float));
-        memcpy(data + (height - i - 1) * width, temp, width * sizeof(float));
-    }
-
-    free(temp);
-}
-
-
-std::vector<GLuint> nifti_image_to_slices_gl(nifti_image *nim)
+std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim)
 {
     // Safety check for nim
     if (!nim || !nim->data)
@@ -286,26 +366,38 @@ std::vector<GLuint> nifti_image_to_slices_gl(nifti_image *nim)
     {
         AX_SLICE_IDX = nim->dim[3] - 1;
     }
-    
+
     memcpy(ax_placeholder, (float *)nim->data + AX_SLICE_IDX * AX_SLICE.width * AX_SLICE.height, AX_SLICE.width * AX_SLICE.height * sizeof(float));
 
     // Coronal slice
+
+    // let's bound the index to the image size
+    if (COR_SLICE_IDX < 0)
+    {
+        COR_SLICE_IDX = 0;
+    }
+    else if (COR_SLICE_IDX >= nim->dim[2])
+    {
+        COR_SLICE_IDX = nim->dim[2] - 1;
+    }
+
     for (int z = 0; z < COR_SLICE.height; z++)
     {
         for (int x = 0; x < COR_SLICE.width; x++)
         {
-            // let's bound the index to the image size
-            if (COR_SLICE_IDX < 0)
-            {
-                COR_SLICE_IDX = 0;
-            }
-            else if (COR_SLICE_IDX >= nim->dim[3])
-            {
-                COR_SLICE_IDX = nim->dim[3] - 1;
-            }
             int index = x + (COR_SLICE_IDX * nim->dim[1]) + (z * nim->dim[1] * nim->dim[2]);
             cor_placeholder[x + z * COR_SLICE.width] = ((float *)nim->data)[index];
         }
+    }
+
+    // let's bound the index to the image size
+    if (SAG_SLICE_IDX < 0)
+    {
+        SAG_SLICE_IDX = 0;
+    }
+    else if (SAG_SLICE_IDX >= nim->dim[2])
+    {
+        SAG_SLICE_IDX = nim->dim[2] - 1;
     }
 
     // Sagittal slice
@@ -313,16 +405,6 @@ std::vector<GLuint> nifti_image_to_slices_gl(nifti_image *nim)
     {
         for (int y = 0; y < SAG_SLICE.width; y++)
         {
-            // let's bound the index to the image size
-            if (SAG_SLICE_IDX < 0)
-            {
-                SAG_SLICE_IDX = 0;
-            }
-            else if (SAG_SLICE_IDX >= nim->dim[2])
-            {
-                SAG_SLICE_IDX = nim->dim[2] - 1;
-            }
-
             int index = SAG_SLICE_IDX + (y * nim->dim[1]) + (z * nim->dim[1] * nim->dim[2]);
             sag_placeholder[y + z * SAG_SLICE.width] = ((float *)nim->data)[index];
         }
@@ -330,13 +412,14 @@ std::vector<GLuint> nifti_image_to_slices_gl(nifti_image *nim)
 
     // normalize the data
     normalize_data(ax_placeholder, AX_SLICE.width * AX_SLICE.height);
-    flip_data(ax_placeholder, AX_SLICE.width, AX_SLICE.height);
-
     normalize_data(cor_placeholder, COR_SLICE.width * COR_SLICE.height);
-    flip_data(cor_placeholder, COR_SLICE.width, COR_SLICE.height);
-
     normalize_data(sag_placeholder, SAG_SLICE.width * SAG_SLICE.height);
-    flip_data(sag_placeholder, SAG_SLICE.width, SAG_SLICE.height);
+    
+    if (nim->ext == ext_NII) {
+        flip_data(ax_placeholder, AX_SLICE.width, AX_SLICE.height);
+        flip_data(cor_placeholder, COR_SLICE.width, COR_SLICE.height);
+        flip_data(sag_placeholder, SAG_SLICE.width, SAG_SLICE.height);
+    }
 
 
     std::vector<GLuint> sliceTexture(3);
@@ -367,10 +450,8 @@ std::vector<GLuint> nifti_image_to_slices_gl(nifti_image *nim)
     glBindTexture(GL_TEXTURE_2D, sliceTexture[2]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, AX_SLICE.width, AX_SLICE.height, 0, GL_RED, GL_FLOAT, ax_placeholder);
 
-
     // Unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
-
 
     // Example cleanup
     free(ax_placeholder);

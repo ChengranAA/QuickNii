@@ -6,7 +6,7 @@ static void glfw_error_callback(int error, const char* description)
 }
 
 // Main code
-int quickniiGUI(int argc, char** argv, nifti_image* nim)
+int quickniiGUI(int argc, char** argv, internal_nim* nim)
 {
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -48,8 +48,8 @@ int quickniiGUI(int argc, char** argv, nifti_image* nim)
 
     // Our state
     ImVec4 clear_color = ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
+    std::vector<GLuint> sliceTexture = internal_image_to_slices_gl(nim);
 
-    std::vector<GLuint> sliceTexture = nifti_image_to_slices_gl(nim);
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -102,10 +102,10 @@ int quickniiGUI(int argc, char** argv, nifti_image* nim)
 						boundMin.x, boundMax.x,
 						boundMin.y, boundMax.y,
 						boundMin.z, boundMax.z,
-						1.0f)) {
+						0.9f)) {
                             // delete the old texture which is a GLuInt[3]
                             glDeleteTextures(3, &sliceTexture[0]);
-                            sliceTexture = nifti_image_to_slices_gl(nim);
+                            sliceTexture = internal_image_to_slices_gl(nim);
 
                         } 
         

@@ -50,3 +50,6 @@ typedef struct V16 V16;
 // prototypes
 VMR read_vmr(const char* filename); 
 V16 read_v16(const char* filename);
+void free_vmr(VMR vmr); 
+void free_v16(V16 vmr);
+
