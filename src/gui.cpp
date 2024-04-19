@@ -1,8 +1,36 @@
 #include "quicknii.hpp"
 
+ImVec2 PLOTDIMENSIONS(1.0f, 1.0f); // Dimensions of the ImPlot plots
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+}
+
+ImRect CalculateTextureRect(const ImVec2& textureSize) {
+    // Calculate the scale to fit the texture within the plot without stretching
+    float scaleX = PLOTDIMENSIONS.x / textureSize.x;
+    float scaleY = PLOTDIMENSIONS.y / textureSize.y;
+
+    // Determine the scale factor based on the cases
+    float scale;
+    if (textureSize.x > PLOTDIMENSIONS.x || textureSize.y > PLOTDIMENSIONS.y) {
+        // Case 1 or 2: One or both texture dimensions are larger than the plot
+        scale = std::min(scaleX, scaleY);
+    } else {
+        // Case 3: Both texture dimensions are smaller than the plot
+        scale = std::max(scaleX, scaleY);
+    }
+
+    // Calculate the size of the texture after scaling depending on the case
+    ImVec2 scaledTextureSize = textureSize * scale;
+
+    // Calculate the position of the texture within the plot
+    ImVec2 texturePos = (PLOTDIMENSIONS - scaledTextureSize) * 0.5f;
+
+    // Create the rectangle that represents the texture within the plot
+    ImRect rect(texturePos, texturePos + scaledTextureSize);
+    return rect;
 }
 
 // Main code
@@ -49,6 +77,13 @@ int quickniiGUI(int argc, char** argv, internal_nim* nim)
     // Our state
     ImVec4 clear_color = ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
     std::vector<GLuint> sliceTexture = internal_image_to_slices_gl(nim);
+
+
+    // get the correct coordicnate of the plot 
+    ImRect sagittalRect = CalculateTextureRect(ImVec2((float)NII_DIM[1], (float)NII_DIM[2]));
+    ImRect coronalRect = CalculateTextureRect(ImVec2((float)NII_DIM[0], (float)NII_DIM[2]));
+    ImRect axialRect = CalculateTextureRect(ImVec2((float)NII_DIM[0], (float)NII_DIM[1]));
+
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -120,13 +155,23 @@ int quickniiGUI(int argc, char** argv, internal_nim* nim)
                     // 1 means sagittal, 2 means coronal, 3 means axial -1
                     // Implementation of plot functions here
                     if (i == 0) {
-                        ImPlot::PlotImage("Sagittal", (void*)(intptr_t)sliceTexture[0], ImVec2(0, 0), ImVec2(NII_DIM[1], NII_DIM[2]), ImVec2(0, 0), ImVec2(NII_DIM[1], NII_DIM[2]));
-                    } else if (i == 1) {
-                        ImPlot::PlotImage("Coronal", (void*)(intptr_t)sliceTexture[1], ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[2]), ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[2]));
-                    } else if (i == 2) {
-                        ImPlot::PlotImage("Axial", (void*)(intptr_t)sliceTexture[2], ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]), ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]));
+                        ImVec2 uv0 = sagittalRect.Min; // Start of texture coordinates
+                        ImVec2 uv1 = sagittalRect.Max; // End of texture coordinates
+                        ImPlot::PlotImage("Sagittal", (void *)(intptr_t)sliceTexture[0], uv0, uv1, ImVec2(0, 0), ImVec2(1, 1));
                     }
- 
+                    else if (i == 1)
+                    {
+                        ImVec2 uv0 = coronalRect.Min; // Start of texture coordinates
+                        ImVec2 uv1 = coronalRect.Max; // End of texture coordinates
+                        ImPlot::PlotImage("Sagittal", (void *)(intptr_t)sliceTexture[1], uv0, uv1, ImVec2(0, 0), ImVec2(1, 1));
+                    }
+                    else if (i == 2)
+                    {
+                        ImVec2 uv0 = axialRect.Min; // Start of texture coordinates
+                        ImVec2 uv1 = axialRect.Max; // End of texture coordinates     
+                        ImPlot::PlotImage("Sagittal", (void *)(intptr_t)sliceTexture[2], uv0, uv1, ImVec2(0, 0), ImVec2(1, 1));
+                    }
+
                     ImPlot::EndPlot();
                 }
             }

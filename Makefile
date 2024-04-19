@@ -31,7 +31,7 @@ LIBS += -L/usr/local/lib -L/opt/homebrew/lib -L./lib/nifti_clib -lniftiio -lznz 
 LIBS += -lglfw 
 LIBS += -lglew
 
-CXXFLAGS += -I/usr/local/include -I/opt/local/include -I/opt/homebrew/include
+CXXFLAGS += -I/usr/local/include -I/opt/local/include -I/opt/homebrew/include -O3
 CFLAGS = $(CXXFLAGS)
 
 ##---------------------------------------------------------------------
