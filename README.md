@@ -2,7 +2,7 @@
 
 QuickNii is a simple NIfTI file viewer that allows you to quickly view NIfTI files in a simple and easy to use interface. It is designed to be a lightweight and fast viewer that can be used to quickly view NIfTI files without the need for a full-featured medical imaging viewer.
 
-<img src="/Users/lcraaaa/Documents/Projects/quicknii_imgui.nosync/README.assets/demo.png" alt="demo" style="zoom:25%;" />
+<img src="./README.assets/demo.png" alt="demo" style="zoom:25%;" />
 
 
 ## Features
