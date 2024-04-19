@@ -65,7 +65,7 @@ nifti_image* wrapper_nifti_image_read(const char* filename);
 void wrapper_nifti_image_free(nifti_image* nim);
 void nifti_image_to_float(nifti_image* nim);
 void nifti_image_to_ras(nifti_image* nim);
-GLuint nifti_image_to_slices_gl(nifti_image *nim);
+std::vector<GLuint> nifti_image_to_slices_gl(nifti_image *nim);
 
 // imgui
 int quickniiGUI(int argc, char** argv, nifti_image* nim);

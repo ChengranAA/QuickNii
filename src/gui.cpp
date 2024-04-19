@@ -5,22 +5,6 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-
-void updatePlots(int* NII_DIM, int* sliceTexture, ImPlotAxisFlags axes_flags) {
-    for (int i = 0; i < 3; ++i) {
-        if (ImPlot::BeginPlot(("plot" + std::to_string(i)).c_str(), ImVec2(350, 350), ImPlotAxisFlags_NoDecorations)) {
-            ImPlot::SetupAxes(NULL, NULL, axes_flags, axes_flags);
-            ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-
-            if (i == 2) {
-                ImPlot::PlotImage("Axial", (void*)(intptr_t)sliceTexture, ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]), ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]));
-            }
-
-            ImPlot::EndPlot();
-        }
-    }
-}
-
 // Main code
 int quickniiGUI(int argc, char** argv, nifti_image* nim)
 {
@@ -65,9 +49,7 @@ int quickniiGUI(int argc, char** argv, nifti_image* nim)
     // Our state
     ImVec4 clear_color = ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
 
-    // Test region 
-    GLuint sliceTexture = nifti_image_to_slices_gl(nim);
-
+    std::vector<GLuint> sliceTexture = nifti_image_to_slices_gl(nim);
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -106,7 +88,6 @@ int quickniiGUI(int argc, char** argv, nifti_image* nim)
                                             ImPlotAxisFlags_NoTickMarks | 
                                             ImPlotAxisFlags_NoDecorations;
 
-        nifti_image_to_slices_gl(nim);
 
         // Create three ImPlots in a 2x2 grid
         for (int i = 0; i < 4; ++i) {
@@ -122,8 +103,10 @@ int quickniiGUI(int argc, char** argv, nifti_image* nim)
 						boundMin.y, boundMax.y,
 						boundMin.z, boundMax.z,
 						0.9f)) {
-                            glDeleteTextures(1, &sliceTexture);
+                            // delete the old texture which is a GLuInt[3]
+                            glDeleteTextures(3, &sliceTexture[0]);
                             sliceTexture = nifti_image_to_slices_gl(nim);
+
                         } 
         
             } else {
@@ -135,9 +118,13 @@ int quickniiGUI(int argc, char** argv, nifti_image* nim)
                     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
 
                     // 1 means sagittal, 2 means coronal, 3 means axial -1
-                    // Implementation of plot functions here 
-                    if (i == 2) {
-                        ImPlot::PlotImage("Axial", (void*)(intptr_t)sliceTexture, ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]), ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]));
+                    // Implementation of plot functions here
+                    if (i == 0) {
+                        ImPlot::PlotImage("Sagittal", (void*)(intptr_t)sliceTexture[0], ImVec2(0, 0), ImVec2(NII_DIM[1], NII_DIM[2]), ImVec2(0, 0), ImVec2(NII_DIM[1], NII_DIM[2]));
+                    } else if (i == 1) {
+                        ImPlot::PlotImage("Coronal", (void*)(intptr_t)sliceTexture[1], ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[2]), ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[2]));
+                    } else if (i == 2) {
+                        ImPlot::PlotImage("Axial", (void*)(intptr_t)sliceTexture[2], ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]), ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]));
                     }
  
                     ImPlot::EndPlot();
@@ -163,7 +150,7 @@ int quickniiGUI(int argc, char** argv, nifti_image* nim)
         glfwSwapBuffers(window);
     }
 
-    glDeleteTextures(1, &sliceTexture);
+    glDeleteTextures(3, &sliceTexture[0]);
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

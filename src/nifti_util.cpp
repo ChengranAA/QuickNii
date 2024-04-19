@@ -241,7 +241,7 @@ void flip_data(float *data, int width, int height)
 }
 
 
-GLuint nifti_image_to_slices_gl(nifti_image *nim)
+std::vector<GLuint> nifti_image_to_slices_gl(nifti_image *nim)
 {
     // Safety check for nim
     if (!nim || !nim->data)
@@ -261,7 +261,7 @@ GLuint nifti_image_to_slices_gl(nifti_image *nim)
     AX_SLICE.height = nim->dim[2];
 
     // Memory allocation for placeholders
-    float *ax_placeholder = (float *)malloc(AX_SLICE.width * AX_SLICE.height * sizeof(float));
+    float *ax_placeholder = (float *)calloc(1, AX_SLICE.width * AX_SLICE.height * sizeof(float));
     float *cor_placeholder = (float *)malloc(COR_SLICE.width * COR_SLICE.height * sizeof(float));
     float *sag_placeholder = (float *)malloc(SAG_SLICE.width * SAG_SLICE.height * sizeof(float));
 
@@ -289,54 +289,61 @@ GLuint nifti_image_to_slices_gl(nifti_image *nim)
         }
     }
 
+    // Sagittal slice
+   for (int z = 0; z < SAG_SLICE.height; z++)
+{
+    for (int y = 0; y < SAG_SLICE.width; y++)
+    {
+        int index = (SAG_SLICE_IDX) + (y * nim->dim[1]) + (z * nim->dim[1] * nim->dim[2]);
+        sag_placeholder[y + z * SAG_SLICE.width] = ((float *)nim->data)[index];
+    }
+}
+
 
     // normalize the data
     normalize_data(ax_placeholder, AX_SLICE.width * AX_SLICE.height);
     flip_data(ax_placeholder, AX_SLICE.width, AX_SLICE.height);
-    
-    // The texture we're going to render to
-    GLuint sliceTexture;
-    glGenTextures(1, &sliceTexture);
+
+    normalize_data(cor_placeholder, COR_SLICE.width * COR_SLICE.height);
+    flip_data(cor_placeholder, COR_SLICE.width, COR_SLICE.height);
+
+    normalize_data(sag_placeholder, SAG_SLICE.width * SAG_SLICE.height);
+    flip_data(sag_placeholder, SAG_SLICE.width, SAG_SLICE.height);
+
+
+    std::vector<GLuint> sliceTexture(3);
+    glGenTextures(3, &sliceTexture[0]);
 
     // for binding the texture
-    glBindTexture(GL_TEXTURE_2D, sliceTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    // swizzle mask to only use the red channel
-    GLint swizzleMask[] = {GL_RED, GL_RED, GL_RED, GL_ONE};
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);  
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, AX_SLICE.width, AX_SLICE.height, 0, GL_RED, GL_FLOAT, ax_placeholder);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    /*
-    // now take the data to the opengl texture
-
-    // The texture we're going to render to
-    GLuint sliceTexture[3];
-    glGenTextures(3, sliceTexture);
-
-    // for binding the texture
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++)
+    {
         glBindTexture(GL_TEXTURE_2D, sliceTexture[i]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 1024, 768, 0, GL_RED, GL_FLOAT, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, sliceTexture[i], 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        // swizzle mask to only use the red channel
+        GLint swizzleMask[] = {GL_RED, GL_RED, GL_RED, GL_ONE};
+        glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
     }
 
-    GLenum DrawBuffers[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-    glDrawBuffers(3, DrawBuffers);
+    // Sagittal slice
+    glBindTexture(GL_TEXTURE_2D, sliceTexture[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, SAG_SLICE.width, SAG_SLICE.height, 0, GL_RED, GL_FLOAT, sag_placeholder);
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        printf("Error: Framebuffer is not complete!\n");
-    }
+    // Coronal slice
+    glBindTexture(GL_TEXTURE_2D, sliceTexture[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, COR_SLICE.width, COR_SLICE.height, 0, GL_RED, GL_FLOAT, cor_placeholder);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // Axial slice
+    glBindTexture(GL_TEXTURE_2D, sliceTexture[2]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, AX_SLICE.width, AX_SLICE.height, 0, GL_RED, GL_FLOAT, ax_placeholder);
+
+
+    // Unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    */
+
     // Example cleanup
     free(ax_placeholder);
     free(cor_placeholder);
