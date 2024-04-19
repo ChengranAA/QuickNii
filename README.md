@@ -28,6 +28,13 @@ QuickNii is a simple NIfTI file viewer that allows you to quickly view NIfTI fil
 QuickNii <NIfTI file> // that's it
 ```
 
+## Development
+```
+chmod +x init.sh && ./init.sh
+make
+```
+The init.sh script will download the necessary dependencies and build the project. The make command will build the project and create the QuickNii executable in the build directory.
+
 
 ## License
 MIT License
