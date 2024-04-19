@@ -18,7 +18,6 @@ int main(int argc, char** argv)
     char const* filename = argv[1];
     nifti_image* nim = wrapper_nifti_image_read(filename);
     nifti_image_to_float(nim); // from this point on, the data is float
-    //nifti_image_to_ras(nim); // from this point on, the data is in RAS space (too slow, not used for now)
 
     // position all slice indices to the middle of the image
     SAG_SLICE_IDX = nim->dim[1] / 2; 
@@ -26,15 +25,14 @@ int main(int argc, char** argv)
     AX_SLICE_IDX = nim->dim[3] / 2;
 
     // slice the nifti image
-    //nifti_image_to_slices_gl(nim);
+    // nifti_image_to_slices_gl(nim);
 
-    // start the GUI
+    // start the GUIs
 
     if(quickniiGUI(argc, argv, nim) != 0){
         return 1;
     }
     
     wrapper_nifti_image_free(nim);
-    //free_nii_slice();
     return 0;
 }

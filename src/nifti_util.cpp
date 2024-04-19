@@ -310,8 +310,6 @@ GLuint nifti_image_to_slices_gl(nifti_image *nim)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, AX_SLICE.width, AX_SLICE.height, 0, GL_RED, GL_FLOAT, ax_placeholder);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    return sliceTexture;
-
     /*
     // now take the data to the opengl texture
 
@@ -343,9 +341,6 @@ GLuint nifti_image_to_slices_gl(nifti_image *nim)
     free(ax_placeholder);
     free(cor_placeholder);
     free(sag_placeholder);
-}
 
-// Function to free the nii_slice
-void free_nii_slice()
-{
+    return sliceTexture;
 }

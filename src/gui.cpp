@@ -5,6 +5,22 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
+
+void updatePlots(int* NII_DIM, int* sliceTexture, ImPlotAxisFlags axes_flags) {
+    for (int i = 0; i < 3; ++i) {
+        if (ImPlot::BeginPlot(("plot" + std::to_string(i)).c_str(), ImVec2(350, 350), ImPlotAxisFlags_NoDecorations)) {
+            ImPlot::SetupAxes(NULL, NULL, axes_flags, axes_flags);
+            ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
+
+            if (i == 2) {
+                ImPlot::PlotImage("Axial", (void*)(intptr_t)sliceTexture, ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]), ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]));
+            }
+
+            ImPlot::EndPlot();
+        }
+    }
+}
+
 // Main code
 int quickniiGUI(int argc, char** argv, nifti_image* nim)
 {
@@ -98,14 +114,18 @@ int quickniiGUI(int argc, char** argv, nifti_image* nim)
             if (i == 3) {
                 // 3D slider here, now is a dummy
                 // ImGui::Dummy(ImVec2(350, 350));
-					static ImVec4 cur3D;
+					// static ImVec4 cur3D;
 					ImVec4 boundMin(0.0f, 0.0f, 0.0f, 0.0f);
-					ImVec4 boundMax((float) NII_DIM[0], (float) NII_DIM[0], (float) NII_DIM[0], 0.0f);
-					SliderScalar3D("Navigator", &cur3D.x, &cur3D.y, &cur3D.z,
+					ImVec4 boundMax((float) NII_DIM[0], (float) NII_DIM[1], (float) NII_DIM[2], 0.0f);
+					if (SliderScalar3D("Navigator", &COR_SLICE_IDX, &SAG_SLICE_IDX, &AX_SLICE_IDX,
 						boundMin.x, boundMax.x,
 						boundMin.y, boundMax.y,
 						boundMin.z, boundMax.z,
-						0.9f);
+						0.9f)) {
+                            glDeleteTextures(1, &sliceTexture);
+                            sliceTexture = nifti_image_to_slices_gl(nim);
+                        } 
+        
             } else {
                 // Create ImPlots
                 if (ImPlot::BeginPlot(("plot" + std::to_string(i)).c_str(), ImVec2(350, 350), ImPlotAxisFlags_NoDecorations)) {
@@ -114,9 +134,9 @@ int quickniiGUI(int argc, char** argv, nifti_image* nim)
                     ImPlot::SetupAxes(NULL, NULL, axes_flags, axes_flags);
                     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
 
-                    // 1 means sagittal, 2 means coronal, 3 means axial
+                    // 1 means sagittal, 2 means coronal, 3 means axial -1
                     // Implementation of plot functions here 
-                    if (i == 0) {
+                    if (i == 2) {
                         ImPlot::PlotImage("Axial", (void*)(intptr_t)sliceTexture, ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]), ImVec2(0, 0), ImVec2(NII_DIM[0], NII_DIM[1]));
                     }
  

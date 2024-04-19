@@ -66,8 +66,7 @@ void wrapper_nifti_image_free(nifti_image* nim);
 void nifti_image_to_float(nifti_image* nim);
 void nifti_image_to_ras(nifti_image* nim);
 GLuint nifti_image_to_slices_gl(nifti_image *nim);
-void free_nii_slice();
 
 // imgui
 int quickniiGUI(int argc, char** argv, nifti_image* nim);
-bool SliderScalar3D(char const *label, float *pValueX, float *pValueY, float *pValueZ, float const fMinX, float const fMaxX, float const fMinY, float const fMaxY, float const fMinZ, float const fMaxZ, float const fScale /*= 1.0f*/);
+bool SliderScalar3D(char const *label, int *pValueX, int *pValueY, int *pValueZ, float const fMinX, float const fMaxX, float const fMinY, float const fMaxY, float const fMinZ, float const fMaxZ, float const fScale /*= 1.0f*/);
