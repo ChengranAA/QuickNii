@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Store the current directory as the project root
-PROJECT_ROOT=$(pwd)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+PROJECT_ROOT="${SCRIPT_DIR}"
 
 # Define paths for the include and lib directories
 INCLUDE="${PROJECT_ROOT}/include"

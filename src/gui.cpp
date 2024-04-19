@@ -163,13 +163,13 @@ int quickniiGUI(int argc, char** argv, internal_nim* nim)
                     {
                         ImVec2 uv0 = coronalRect.Min; // Start of texture coordinates
                         ImVec2 uv1 = coronalRect.Max; // End of texture coordinates
-                        ImPlot::PlotImage("Sagittal", (void *)(intptr_t)sliceTexture[1], uv0, uv1, ImVec2(0, 0), ImVec2(1, 1));
+                        ImPlot::PlotImage("Coronal", (void *)(intptr_t)sliceTexture[1], uv0, uv1, ImVec2(0, 0), ImVec2(1, 1));
                     }
                     else if (i == 2)
                     {
                         ImVec2 uv0 = axialRect.Min; // Start of texture coordinates
                         ImVec2 uv1 = axialRect.Max; // End of texture coordinates     
-                        ImPlot::PlotImage("Sagittal", (void *)(intptr_t)sliceTexture[2], uv0, uv1, ImVec2(0, 0), ImVec2(1, 1));
+                        ImPlot::PlotImage("Axial", (void *)(intptr_t)sliceTexture[2], uv0, uv1, ImVec2(0, 0), ImVec2(1, 1));
                     }
 
                     ImPlot::EndPlot();
