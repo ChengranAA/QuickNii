@@ -31,7 +31,7 @@ Clone the repository and run the following commands:
 chmod +x init.sh && ./init.sh
 make
 ```
-The init.sh script will download the necessary dependencies and build the project. The make command will build the project and create the QuickNii executable in the build directory.
+The init.sh script will download the necessary dependencies. The make command will build the project and create the QuickNii executable in the build directory.
 
 To install the executable, run the following command:
 ```
