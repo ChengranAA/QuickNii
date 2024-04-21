@@ -14,7 +14,7 @@ QuickNii is a simple NIfTI file viewer that allows you to quickly view NIfTI fil
 
 ## Usage
 ```
-QuickNii <NIfTI file> // that's it
+quicknii <NIfTI file> // that's it
 ```
 
 ## Development
