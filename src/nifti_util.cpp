@@ -358,28 +358,28 @@ std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim)
     // note: the data is fortran ordered, so the data is stored in the following way: data[x + y * width + z * width * height]
 
     // let's bound the index to the image size
-    if (AX_SLICE_IDX < 0)
-    {
-        AX_SLICE_IDX = 0;
-    }
-    else if (AX_SLICE_IDX >= nim->dim[3])
-    {
-        AX_SLICE_IDX = nim->dim[3] - 1;
-    }
+    //if (AX_SLICE_IDX < 0)
+    //{
+    //    AX_SLICE_IDX = 0;
+    //}
+    //else if (AX_SLICE_IDX >= nim->dim[3])
+    //{
+    //    AX_SLICE_IDX = nim->dim[3] - 1;
+    //}
 
     memcpy(ax_placeholder, (float *)nim->data + AX_SLICE_IDX * AX_SLICE.width * AX_SLICE.height, AX_SLICE.width * AX_SLICE.height * sizeof(float));
 
-    // Coronal slice
-
-    // let's bound the index to the image size
-    if (COR_SLICE_IDX < 0)
-    {
-        COR_SLICE_IDX = 0;
-    }
-    else if (COR_SLICE_IDX >= nim->dim[2])
-    {
-        COR_SLICE_IDX = nim->dim[2] - 1;
-    }
+    //// Coronal slice
+//
+    //// let's bound the index to the image size
+    //if (COR_SLICE_IDX < 0)
+    //{
+    //    COR_SLICE_IDX = 0;
+    //}
+    //else if (COR_SLICE_IDX >= nim->dim[2])
+//    {
+    //    COR_SLICE_IDX = nim->dim[2] - 1;
+    //}
 
     for (int z = 0; z < COR_SLICE.height; z++)
     {
@@ -391,14 +391,14 @@ std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim)
     }
 
     // let's bound the index to the image size
-    if (SAG_SLICE_IDX < 0)
-    {
-        SAG_SLICE_IDX = 0;
-    }
-    else if (SAG_SLICE_IDX >= nim->dim[2])
-    {
-        SAG_SLICE_IDX = nim->dim[2] - 1;
-    }
+    //if (SAG_SLICE_IDX < 0)
+    //{
+    //    SAG_SLICE_IDX = 0;
+    //}
+    //else if (SAG_SLICE_IDX >= nim->dim[2])
+    //{
+    //    SAG_SLICE_IDX = nim->dim[2] - 1;
+    //}
 
     // Sagittal slice
     for (int z = 0; z < SAG_SLICE.height; z++)

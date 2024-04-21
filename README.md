@@ -12,14 +12,6 @@ QuickNii is a simple NIfTI file viewer that allows you to quickly view NIfTI fil
 - Supports viewing NIfTI files in both 3D and 4D (Work in progress)
 - Static Linked (No need to install any dependencies)
 
-## Roadmap
-- Fix memory issue
-- Avoid stretching the image
-- Support for 4D NIfTI files
-- Support for BrainVoyager format (VMR/V16, FMR/STC)
-- Metadata display
-- Efficient orientation transformation to RAS
-
 ## Usage
 ```
 QuickNii <NIfTI file> // that's it

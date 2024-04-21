@@ -173,6 +173,24 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
   int16_t fz = static_cast<int16_t>(fZ);
   fZ =  (int16_t)fz;
 
+  // bound the values
+  if (fX < fMinX)
+    fX = fMinX;
+  if (fX > fMaxX)
+    fX = fMaxX;
+
+  if (fY < fMinY)
+    fY = fMinY;
+  if (fY > fMaxY)
+    fY = fMaxY;
+
+  if (fZ < fMinZ)
+    fZ = fMinZ;
+  if (fZ > fMaxZ)
+    fZ = fMaxZ;
+  
+  std::cout << "fX: " << fX << " fY: " << fY << " fZ: " << fZ << std::endl;
+
   float const fScaleX = (fX - fMinX) / fDeltaX;
   float const fScaleY = 1.0f - (fY - fMinY) / fDeltaY;
 
