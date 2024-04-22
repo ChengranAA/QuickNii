@@ -89,7 +89,6 @@ internal_nim *wrapper_bv_image_read(const char *filename, const char *ext)
         for (int i = 0; i < nim.DimX * nim.DimY * nim.DimZ; i++) {
             i_nim->data[i] = (float)nim.data[i];
         }
-        
         free_vmr(nim);
         return i_nim;
     }

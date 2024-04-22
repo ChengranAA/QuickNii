@@ -123,9 +123,11 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
 
   ImGui::PopID();
 
-  constexpr float fDragZOffsetX = 64.0f;
+  constexpr float fDragZOffsetX = 70.0f;
 
-  ImRect oZDragRect(ImVec2(vStart.x + 2.0f * fX3 + fDragZOffsetX, vStart.y + 2.0f * fY3), ImVec2(vStart.x + vSize.x + fDragZOffsetX, vStart.y + vSize.y));
+  
+  ImRect oZDragRect(ImVec2(vStart.x + 2.0f * fX3 + fDragZOffsetX , vStart.y + 2.0f * fY3 + 30.0f), ImVec2(vStart.x + vSize.x + fDragZOffsetX, vStart.y + vSize.y + 30.0f));
+
 
   ImVec2 const vMousePos = ImGui::GetMousePos();
   ImVec2 const vSecurity(7.0f, 7.0f);
@@ -231,11 +233,7 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
   ImVec2 const vZTextPos((vTextSlideZMax - vTextSlideZMin) * fScaleZ + vTextSlideZMin);
 
   ImVec2 const vHandlePosX = vXTextPos + ImVec2(0.0f, vXSize.y + fHandleOffsetCoef * fCursorOff);
-  ImVec2 const vHandlePosY = vYTextPos + ImVec2(vYSize.x + (fHandleOffsetCoef + 1.0f) * fCursorOff, 0.0f);
-
-  // ImRect handle_x_bb = ImRect(vHandlePosX - ImVec2(fHandleRadius, fHandleRadius) - vSecurity, vHandlePosX + ImVec2(fHandleRadius, fHandleRadius) + vSecurity);
-  // ImRect handle_y_bb = ImRect(vHandlePosY - ImVec2(fHandleRadius, fHandleRadius) - vSecurity, vHandlePosY + ImVec2(fHandleRadius, fHandleRadius) + vSecurity);
-  // ImRect handle_z_bb = ImRect(vHandlePosY - ImVec2(fHandleRadius, fHandleRadius) - vSecurity, vHandlePosY + ImVec2(fHandleRadius, fHandleRadius) + vSecurity);
+  ImVec2 const vHandlePosY = ImVec2(vYTextPos.x, vYTextPos.y) + ImVec2(17.0f+ (fHandleOffsetCoef + 1.0f) * fCursorOff, 0.0f); // now just set x to be a constant value 
 
   if (ImGui::IsMouseHoveringRect(vHandlePosX - ImVec2(fHandleRadius, fHandleRadius) - vSecurity, vHandlePosX + ImVec2(fHandleRadius, fHandleRadius) + vSecurity) &&
   	ImGui::IsMouseDown(ImGuiMouseButton_Left))
