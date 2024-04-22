@@ -341,7 +341,7 @@ std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim)
     AX_SLICE.height = nim->dim[2];
 
     // Memory allocation for placeholders
-    float *ax_placeholder = (float *)calloc(1, AX_SLICE.width * AX_SLICE.height * sizeof(float));
+    float *ax_placeholder = (float *)malloc(AX_SLICE.width * AX_SLICE.height * sizeof(float));
     float *cor_placeholder = (float *)malloc(COR_SLICE.width * COR_SLICE.height * sizeof(float));
     float *sag_placeholder = (float *)malloc(SAG_SLICE.width * SAG_SLICE.height * sizeof(float));
 
@@ -356,30 +356,9 @@ std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim)
 
     // Copy the data to the placeholders
     // note: the data is fortran ordered, so the data is stored in the following way: data[x + y * width + z * width * height]
-
-    // let's bound the index to the image size
-    //if (AX_SLICE_IDX < 0)
-    //{
-    //    AX_SLICE_IDX = 0;
-    //}
-    //else if (AX_SLICE_IDX >= nim->dim[3])
-    //{
-    //    AX_SLICE_IDX = nim->dim[3] - 1;
-    //}
-
     memcpy(ax_placeholder, (float *)nim->data + AX_SLICE_IDX * AX_SLICE.width * AX_SLICE.height, AX_SLICE.width * AX_SLICE.height * sizeof(float));
 
     //// Coronal slice
-//
-    //// let's bound the index to the image size
-    //if (COR_SLICE_IDX < 0)
-    //{
-    //    COR_SLICE_IDX = 0;
-    //}
-    //else if (COR_SLICE_IDX >= nim->dim[2])
-//    {
-    //    COR_SLICE_IDX = nim->dim[2] - 1;
-    //}
 
     for (int z = 0; z < COR_SLICE.height; z++)
     {
@@ -390,16 +369,6 @@ std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim)
         }
     }
 
-    // let's bound the index to the image size
-    //if (SAG_SLICE_IDX < 0)
-    //{
-    //    SAG_SLICE_IDX = 0;
-    //}
-    //else if (SAG_SLICE_IDX >= nim->dim[2])
-    //{
-    //    SAG_SLICE_IDX = nim->dim[2] - 1;
-    //}
-
     // Sagittal slice
     for (int z = 0; z < SAG_SLICE.height; z++)
     {
@@ -409,6 +378,7 @@ std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim)
             sag_placeholder[y + z * SAG_SLICE.width] = ((float *)nim->data)[index];
         }
     }
+
 
     // normalize the data
     normalize_data(ax_placeholder, AX_SLICE.width * AX_SLICE.height);
@@ -431,9 +401,6 @@ std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim)
         glBindTexture(GL_TEXTURE_2D, sliceTexture[i]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);

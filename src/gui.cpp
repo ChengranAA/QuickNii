@@ -132,8 +132,7 @@ int quickniiGUI(int argc, char** argv, internal_nim* nim)
                 // ImGui::Dummy(ImVec2(350, 350));
 					// static ImVec4 cur3D;
 					ImVec4 boundMin(0.0f, 0.0f, 0.0f, 0.0f);
-                    std::cout << "NII_DIM: " << NII_DIM[0] << " " << NII_DIM[1] << " " << NII_DIM[2] << std::endl;
-					ImVec4 boundMax((float) NII_DIM[0], (float) NII_DIM[1], (float) NII_DIM[2], 0.0f);
+					ImVec4 boundMax((float) NII_DIM[0] - 1, (float) NII_DIM[1] - 1, (float) NII_DIM[2] - 1, 0.0f);
 					if (SliderScalar3D("Navigator", &SAG_SLICE_IDX ,&COR_SLICE_IDX, &AX_SLICE_IDX,
 						boundMin.x, boundMax.x,
 						boundMin.y, boundMax.y,

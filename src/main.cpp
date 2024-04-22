@@ -58,9 +58,9 @@ int main(int argc, char** argv)
     }
 
     // position all slice indices to the middle of the image
-    SAG_SLICE_IDX = i_nim->dim[1] / 2; 
-    COR_SLICE_IDX = i_nim->dim[2] / 2;
-    AX_SLICE_IDX = i_nim->dim[3] / 2;
+    SAG_SLICE_IDX = i_nim->dim[1]  / 2; 
+    COR_SLICE_IDX = i_nim->dim[2]  /2;
+    AX_SLICE_IDX = i_nim->dim[3] / 2 ;
 
     //std::cout << "SLICE: " << SAG_SLICE_IDX << " " << COR_SLICE_IDX << " " << AX_SLICE_IDX<< std::endl;
 

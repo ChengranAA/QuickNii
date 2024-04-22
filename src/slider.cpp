@@ -40,6 +40,14 @@ float DistToSegmentSqr(ImVec2 const p, ImVec2 const v, ImVec2 const w)
   return ImAbs(lDx * dy - lDy * dx) / l2;
 }
 
+template<typename T>
+T clamp_cast(float value, float min, float max) {
+    if (value < min) value = min;
+    if (value > max) value = max;
+    return static_cast<T>(value);
+}
+
+
 bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ, float const fMinX, float const fMaxX, float const fMinY, float const fMaxY, float const fMinZ, float const fMaxZ, float const fScale /*= 1.0f*/)
 {
   assert(fMinX < fMaxX);
@@ -159,37 +167,12 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
 
     bModified = true;
   }
-
-  fX = ImClamp((float)fX, fMinX, fMaxX);
-  fY = ImClamp((float)fY, fMinY, fMaxY);
-  fZ = ImClamp((float)fZ, fMinZ, fMaxZ);
-
-  int16_t fx = static_cast<int16_t>(fX);
-  fX =  (int16_t)fx;
-
-  int16_t fy = static_cast<int16_t>(fY);
-  fY =  (int16_t)fy;
-
-  int16_t fz = static_cast<int16_t>(fZ);
-  fZ =  (int16_t)fz;
-
-  // bound the values
-  if (fX < fMinX)
-    fX = fMinX;
-  if (fX > fMaxX)
-    fX = fMaxX;
-
-  if (fY < fMinY)
-    fY = fMinY;
-  if (fY > fMaxY)
-    fY = fMaxY;
-
-  if (fZ < fMinZ)
-    fZ = fMinZ;
-  if (fZ > fMaxZ)
-    fZ = fMaxZ;
   
-  std::cout << "fX: " << fX << " fY: " << fY << " fZ: " << fZ << std::endl;
+
+  //fX = clamp_cast<int16_t>(*pValueX, fMinX, fMaxX);
+  //fY = clamp_cast<int16_t>(*pValueY, fMinY, fMaxY);
+  //fZ = clamp_cast<int16_t>(*pValueZ, fMinZ, fMaxZ);
+
 
   float const fScaleX = (fX - fMinX) / fDeltaX;
   float const fScaleY = 1.0f - (fY - fMinY) / fDeltaY;
@@ -220,9 +203,9 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
   char pBufferY[16];
   char pBufferZ[16];
 
-  ImFormatString(pBufferX, IM_ARRAYSIZE(pBufferX), "%d", *(int const *)&fX);
-  ImFormatString(pBufferY, IM_ARRAYSIZE(pBufferY), "%d", *(int const *)&fY);
-  ImFormatString(pBufferZ, IM_ARRAYSIZE(pBufferZ), "%d", *(int const *)&fZ);
+  ImFormatString(pBufferX, IM_ARRAYSIZE(pBufferX), "%d", *(int const *)&fX + 1);
+  ImFormatString(pBufferY, IM_ARRAYSIZE(pBufferY), "%d", *(int const *)&fY + 1);
+  ImFormatString(pBufferZ, IM_ARRAYSIZE(pBufferZ), "%d", *(int const *)&fZ + 1);
 
 
   ImU32 const uTextCol = ImGui::ColorConvertFloat4ToU32(ImGui::GetStyle().Colors[ImGuiCol_Text]);
@@ -276,6 +259,10 @@ bool SliderScalar3D(char const *pLabel, int *pValueX, int *pValueY, int *pValueZ
 
     bModified = true;
   }
+
+  fX = clamp_cast<int16_t>(*pValueX, fMinX, fMaxX);
+  fY = clamp_cast<int16_t>(*pValueY, fMinY, fMaxY);
+  fZ = clamp_cast<int16_t>(*pValueZ, fMinZ, fMaxZ);
 
   pDrawList->AddText(
       ImVec2(
