@@ -52,6 +52,7 @@ int main(int argc, char** argv)
          i_nim = wrapper_bv_image_read(filename, ext);
     } else if (strcmp(ext, "nii") == 0 || strcmp(ext, ".nii.gz") == 0) {
          i_nim = wrapper_nifti_image_read(filename);
+         bv_image_to_ras(i_nim);
     } else {
         std::cout << "Error: file format not supported" << std::endl;
         return 1;

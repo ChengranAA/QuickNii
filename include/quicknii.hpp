@@ -80,9 +80,11 @@ internal_nim *wrapper_bv_image_read(const char *filename, const char *ext);
 // nifti functions 
 mat44 wrapper_nifti_get_affine(nifti_image* nim);
 internal_nim * wrapper_nifti_image_read(const char *filename);
+std::vector<GLuint> bv_image_to_slices_gl(internal_nim* nim);
+void bv_image_to_ras(internal_nim* nim);
 void nifti_image_to_float(nifti_image* nim);
 void nifti_image_to_ras(nifti_image* nim);
-std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim);
+std::vector<GLuint> nifti_image_to_slices_gl(internal_nim *nim);
 void internal_image_free(internal_nim *nim);
 
 // imgui

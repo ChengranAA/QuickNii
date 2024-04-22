@@ -102,6 +102,156 @@ internal_nim *wrapper_bv_image_read(const char *filename, const char *ext)
     }
 }
 
+std::vector<GLuint> bv_image_to_slices_gl(internal_nim* nim) {
+     // Safety check for nim
+    if (!nim || !nim->data)
+    {
+        printf("Invalid nifti_image or data is NULL\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Set the width and height of the slices
+    SAG_SLICE.width = nim->dim[2];
+    SAG_SLICE.height = nim->dim[3];
+
+    COR_SLICE.width = nim->dim[1];
+    COR_SLICE.height = nim->dim[3];
+
+    AX_SLICE.width = nim->dim[1];
+    AX_SLICE.height = nim->dim[2];
+
+    // Memory allocation for placeholders
+    float *ax_placeholder = (float *)malloc(AX_SLICE.width * AX_SLICE.height * sizeof(float));
+    float *cor_placeholder = (float *)malloc(COR_SLICE.width * COR_SLICE.height * sizeof(float));
+    float *sag_placeholder = (float *)malloc(SAG_SLICE.width * SAG_SLICE.height * sizeof(float));
+
+    if (!ax_placeholder || !cor_placeholder || !sag_placeholder)
+    {
+        printf("Failed to allocate memory for one or more slices\n");
+        free(ax_placeholder); // Safe to call free on NULL
+        free(cor_placeholder);
+        free(sag_placeholder);
+        exit(EXIT_FAILURE);
+    }
+
+    // Copy the data to the placeholders
+    // note: the data is fortran ordered, so the data is stored in the following way: data[x + y * width + z * width * height]
+    memcpy(ax_placeholder, (float *)nim->data + AX_SLICE_IDX * AX_SLICE.width * AX_SLICE.height, AX_SLICE.width * AX_SLICE.height * sizeof(float));
+
+    //// Coronal slice
+
+    for (int z = 0; z < COR_SLICE.height; z++)
+    {
+        for (int x = 0; x < COR_SLICE.width; x++)
+        {
+            int index = x + (COR_SLICE_IDX * nim->dim[1]) + (z * nim->dim[1] * nim->dim[2]);
+            cor_placeholder[x + z * COR_SLICE.width] = ((float *)nim->data)[index];
+        }
+    }
+
+    // Sagittal slice
+    for (int z = 0; z < SAG_SLICE.height; z++)
+    {
+        for (int y = 0; y < SAG_SLICE.width; y++)
+        {
+            int index = SAG_SLICE_IDX + (y * nim->dim[1]) + (z * nim->dim[1] * nim->dim[2]);
+            sag_placeholder[y + z * SAG_SLICE.width] = ((float *)nim->data)[index];
+        }
+    }
+
+
+    // normalize the data
+    normalize_data(ax_placeholder, AX_SLICE.width * AX_SLICE.height);
+    normalize_data(cor_placeholder, COR_SLICE.width * COR_SLICE.height);
+    normalize_data(sag_placeholder, SAG_SLICE.width * SAG_SLICE.height);
+
+    std::vector<GLuint> sliceTexture(3);
+    glGenTextures(3, &sliceTexture[0]);
+
+    // for binding the texture
+    for (int i = 0; i < 3; i++)
+    {
+        glBindTexture(GL_TEXTURE_2D, sliceTexture[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+        GLfloat borderColor[] = {0.0, 0.0, 0.0, 1.0};
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+        // swizzle mask to only use the red channel
+        GLint swizzleMask[] = {GL_RED, GL_RED, GL_RED, GL_ONE};
+        glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+    }
+
+    // Sagittal slice
+    glBindTexture(GL_TEXTURE_2D, sliceTexture[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, SAG_SLICE.width, SAG_SLICE.height, 0, GL_RED, GL_FLOAT, sag_placeholder);
+
+    // Coronal slice
+    glBindTexture(GL_TEXTURE_2D, sliceTexture[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, COR_SLICE.width, COR_SLICE.height, 0, GL_RED, GL_FLOAT, cor_placeholder);
+
+    // Axial slice
+    glBindTexture(GL_TEXTURE_2D, sliceTexture[2]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, AX_SLICE.width, AX_SLICE.height, 0, GL_RED, GL_FLOAT, ax_placeholder);
+
+    // Unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Example cleanup
+    free(ax_placeholder);
+    free(cor_placeholder);
+    free(sag_placeholder);
+
+    return sliceTexture;
+}
+
+void bv_image_to_ras(internal_nim* nim) {
+    if (!nim || !nim->data) {
+        printf("Invalid nifti_image or data is NULL\n");
+        return;
+    }
+
+    int dimZ = nim->dim[3];
+    int dimY = nim->dim[2];
+    int dimX = nim->dim[1];
+
+    // Allocate new memory for the transformed data
+    float* transformed_data = new float[dimZ * dimY * dimX];
+    if (!transformed_data) {
+        printf("Failed to allocate memory for transformed data\n");
+        return;
+    }
+
+    // Transpose the matrix: (0, 2, 1) corresponds to swapping Y and X
+    for (int z = 0; z < dimZ; ++z) {
+        for (int y = 0; y < dimY; ++y) {
+            for (int x = 0; x < dimX; ++x) {
+                transformed_data[z * dimX * dimY + x * dimY + y] = nim->data[z * dimY * dimX + y * dimX + x];
+            }
+        }
+    }
+
+    // Flip all axes: reverse each dimension
+    for (int z = 0; z < dimZ; ++z) {
+        for (int y = 0; y < dimX; ++y) {
+            std::reverse(&transformed_data[(z * dimX * dimY) + (y * dimY)], &transformed_data[(z * dimX * dimY) + ((y + 1) * dimY)]);
+        }
+    }
+    for (int z = 0; z < dimZ; ++z) {
+        std::reverse(&transformed_data[(z * dimX * dimY)], &transformed_data[((z + 1) * dimX * dimY)]);
+    }
+    std::reverse(transformed_data, transformed_data + dimZ * dimY * dimX);
+
+    // Replace old data with new data
+    free(nim->data); // Free the old data
+    nim->data = transformed_data; // Point to the new data
+}
+
+
 //  === Nifti functions ===
 
 // wrapper for nifti_read_header
@@ -320,7 +470,7 @@ void nifti_image_to_ras(nifti_image *nim)
 // the first three fields are the width, height, index of the slice will unambiously tell us the size of the data field calculated as width*height*sizeof(float)
 
 // this function will also take the slice to a opengl texture
-std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim)
+std::vector<GLuint> nifti_image_to_slices_gl(internal_nim *nim)
 {
     // Safety check for nim
     if (!nim || !nim->data)
@@ -384,11 +534,11 @@ std::vector<GLuint> internal_image_to_slices_gl(internal_nim *nim)
     normalize_data(cor_placeholder, COR_SLICE.width * COR_SLICE.height);
     normalize_data(sag_placeholder, SAG_SLICE.width * SAG_SLICE.height);
     
-    if (nim->ext == ext_NII) {
-        flip_data(ax_placeholder, AX_SLICE.width, AX_SLICE.height);
-        flip_data(cor_placeholder, COR_SLICE.width, COR_SLICE.height);
-        flip_data(sag_placeholder, SAG_SLICE.width, SAG_SLICE.height);
-    }
+
+    flip_data(ax_placeholder, AX_SLICE.width, AX_SLICE.height);
+    flip_data(cor_placeholder, COR_SLICE.width, COR_SLICE.height);
+    flip_data(sag_placeholder, SAG_SLICE.width, SAG_SLICE.height);
+
 
 
     std::vector<GLuint> sliceTexture(3);
