@@ -1,6 +1,6 @@
 # QuickNii - Quick and easy NIfTI file viewer
 
-QuickNii is a simple NIfTI file viewer that allows you to quickly view NIfTI files in a simple and easy to use interface. It is designed to be a lightweight and fast viewer that can be used to quickly view NIfTI files without the need for a full-featured medical imaging viewer.
+QuickNii is a simple NIfTI file viewer that allows you to quickly view NIfTI files in a simple and easy to use interface. It is designed to be a lightweight (only about 3MB!) and fast viewer that can be used to quickly view NIfTI files without the need for a full-featured medical imaging viewer.
 
 <img src="./README.assets/demo.png" alt="demo" style="zoom:25%;" />
 
@@ -9,8 +9,8 @@ QuickNii is a simple NIfTI file viewer that allows you to quickly view NIfTI fil
 
 - Simple and easy to use interface
 - Fast and lightweight
-- Supports viewing NIfTI files in both 3D and 4D (Work in progress, support 3D at the moment)
-- Supports viewing BrainVoyager files (vmr, fmr) (Work in progress, support vmr at the moment)
+- Supports viewing NIfTI files in both 3D and 4D (Work in progress, 3D support at the moment, can view the first volume of 4D data)
+- Supports viewing BrainVoyager files (vmr, fmr) (Work in progress, vmr support at the moment)
 - Static Linked (No need to install any dependencies)
 
 ## Usage
