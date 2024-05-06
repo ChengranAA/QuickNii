@@ -53,7 +53,6 @@ $(BUILD_DIR)/%.o:$(IMGUI_DIR)/backends/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 all: $(EXE)
-	rm -f imgui.ini
 	@echo Build complete
 
 $(EXE): $(OBJS)
@@ -62,10 +61,6 @@ $(EXE): $(OBJS)
 clean:
 	rm -f $(EXE)
 	rm -rf $(BUILD_DIR)
-	rm -f imgui.ini
-
-clean_ini:
-	rm -f imgui.ini
 
 install:
 	sudo cp $(EXE) /usr/local/bin

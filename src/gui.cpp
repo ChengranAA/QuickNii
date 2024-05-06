@@ -64,6 +64,7 @@ int quickniiGUI(int argc, char **argv, internal_nim *nim)
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
+    io.IniFilename = nullptr; 
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     // io.WantCaptureMouse = true;
     // io.WantCaptureKeyboard = true;
