@@ -13,31 +13,37 @@ int NII_DIM[3];
 
 // current implementation of the file extension checker (better thing needed) 
 const char* getFileExtension(const char* filename) {
-    const char* lastDot = strrchr(filename, '.');
-    if (!lastDot || lastDot == filename) return ""; // Check if no dot or dot is the first character.
-
-    // Handle compressed file extensions like .tar.gz
-    const char* previousDot = NULL;
-    if (lastDot != filename) {
-        previousDot = lastDot - 1;
-        // Search backwards for the next dot before the last dot
-        while (previousDot > filename && *previousDot != '.') {
-            previousDot--;
-        }
-        // Check if the dot found is part of the extension (like .tar in .tar.gz)
-        if (*previousDot != '.' || previousDot == filename) {
-            previousDot = lastDot; // No valid second dot found, use the last dot
+    // Define the known extensions
+    const char* knownExtensions[] = {"vmr", "v16", "nii"};
+    const int numKnownExtensions = sizeof(knownExtensions) / sizeof(knownExtensions[0]);
+    
+    // Find the last dot in the filename
+    const char *dot = strrchr(filename, '.');
+    if (!dot || dot == filename) return "UNKNOWN";
+    
+    // Handle .gz files
+    if (strcmp(dot, ".gz") == 0) {
+        // Find the second last dot before .gz
+        const char *dot2 = strrchr(filename, '.');
+        if (!dot2 || dot2 == filename) return "UNKNOWN";
+        // Move dot2 to the second last dot position
+        dot2 = strrchr(filename, dot2 - filename - 1);
+        if (!dot2 || dot2 == filename) return "UNKNOWN";
+        dot = dot2;
+    }
+    
+    // Extract the extension
+    const char* extension = dot + 1;
+    
+    // Check if the extension is one of the known extensions
+    for (int i = 0; i < numKnownExtensions; i++) {
+        if (strcmp(extension, knownExtensions[i]) == 0) {
+            return extension;
         }
     }
-
-    // If the extension has only one dot, return the extension without the dot
-    if (previousDot == lastDot) {
-        previousDot++;
-    }
-
-    return previousDot; // Return the extension starting from the first relevant dot
+    
+    return "UNKNOWN";
 }
-
 // main entry point
 int main(int argc, char** argv)
 {
@@ -50,7 +56,7 @@ int main(int argc, char** argv)
 
     if (strcmp(ext, "vmr") == 0 || strcmp(ext, "v16") == 0) {
          i_nim = wrapper_bv_image_read(filename, ext);
-         bv_image_to_ras(i_nim);
+         // bv_image_to_ras(i_nim);
     } else if (strcmp(ext, "nii") == 0 || strcmp(ext, ".nii.gz") == 0) {
          i_nim = wrapper_nifti_image_read(filename);
     } else {
