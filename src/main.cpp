@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     if(argc == 2){
         if (strcmp(ext, "vmr") == 0 || strcmp(ext, "v16") == 0) {
              i_nim = wrapper_bv_image_read(filename, ext);
-             bv_image_to_ras(i_nim);
+             //bv_image_to_ras(i_nim);
         } else if (strcmp(ext, "nii") == 0 || strcmp(ext, "gz") == 0) {
              i_nim = wrapper_nifti_image_read(filename);
         } else {
