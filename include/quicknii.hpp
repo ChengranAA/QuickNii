@@ -22,6 +22,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream> 
+#include <filesystem>
+#include <cstdlib>
 #include <cassert>  
 #include <algorithm>
 #include <string>
@@ -30,6 +32,7 @@ extern "C" {
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> 
 // #include <GLES2/gl2.h>
+namespace fs = std::__fs::filesystem;
 
 // some global variables
 // file extensions
@@ -75,16 +78,18 @@ extern nii_slice AX_SLICE;
 
 // bv functions
 internal_nim *wrapper_bv_image_read(const char *filename, const char *ext);
-
+std::vector<GLuint> bv_image_to_slices_gl(internal_nim* nim);
+void bv_image_to_ras(internal_nim* nim);
 
 // nifti functions 
 mat44 wrapper_nifti_get_affine(nifti_image* nim);
 internal_nim * wrapper_nifti_image_read(const char *filename);
-std::vector<GLuint> bv_image_to_slices_gl(internal_nim* nim);
-void bv_image_to_ras(internal_nim* nim);
 void nifti_image_to_float(nifti_image* nim);
 void nifti_image_to_ras(nifti_image* nim);
 std::vector<GLuint> nifti_image_to_slices_gl(internal_nim *nim);
+
+
+// internal image free
 void internal_image_free(internal_nim *nim);
 
 // imgui

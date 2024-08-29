@@ -26,13 +26,8 @@ ImRect CalculateTextureRect(const ImVec2 &textureSize)
         scale = std::max(scaleX, scaleY);
     }
 
-    // Calculate the size of the texture after scaling depending on the case
     ImVec2 scaledTextureSize = textureSize * scale;
-
-    // Calculate the position of the texture within the plot
     ImVec2 texturePos = (PLOTDIMENSIONS - scaledTextureSize) * 0.5f;
-
-    // Create the rectangle that represents the texture within the plot
     ImRect rect(texturePos, texturePos + scaledTextureSize);
     return rect;
 }
